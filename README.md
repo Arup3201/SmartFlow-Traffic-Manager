@@ -4,7 +4,7 @@ ATMS is a system that is responsible for predicting traffic flow to solve conges
 
 ## System Features
 
-Artificial Traffic Management System tackles the following problems -
+Artificial Traffic Management System has the following features to help and improve traffic management using AI -
 
 **Predictive Traffic Flow Analysis:**
 - **Task:** Use machine learning algorithms to predict traffic patterns based on historical data, events, and weather conditions. Provide real-time predictions for traffic congestion and suggest alternative routes.
