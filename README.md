@@ -2,7 +2,7 @@
 
 ATMS is a system that is responsible for predicting traffic flow to solve congestion problems and suggest alternate routes. It also controls the traffic lights using AI to optimize the singla timing based on traffic conditions. ATMS helps in finding accidents and alerting the users so that any emergency measures can be taken as early as possible. Along with this it gives smart parking solutions, traffic camera analytics, dashboards, sharing traffic data among others, optimizing public transportations and prioritizing emergency vehicles.
 
-## Business Problem
+## System Features
 
 Artificial Traffic Management System tackles the following problems -
 
