@@ -1,10 +1,10 @@
-# Artificial Traffic Management System
+# SmartFlow Traffic Manager
 
-ATMS is a system that is responsible for predicting traffic flow to solve congestion problems and suggest alternate routes. It also controls the traffic lights using AI to optimize the singla timing based on traffic conditions. ATMS helps in finding accidents and alerting the users so that any emergency measures can be taken as early as possible. Along with this it gives smart parking solutions, traffic camera analytics, dashboards, sharing traffic data among others, optimizing public transportations and prioritizing emergency vehicles.
+STM is a system that is responsible for predicting traffic flow to solve congestion problems and suggest alternate routes. It also controls the traffic lights using AI to optimize the singla timing based on traffic conditions. STM helps in finding accidents and alerting the users so that any emergency measures can be taken as early as possible. Along with this it gives smart parking solutions, traffic camera analytics, dashboards, sharing traffic data among others, optimizing public transportations and prioritizing emergency vehicles.
 
 ## System Features
 
-Artificial Traffic Management System has the following features to help and improve traffic management using AI -
+SmartFlow Traffic Manager has the following features to help and improve traffic management using AI -
 
 **Predictive Traffic Flow Analysis:**
 - **Task:** Use machine learning algorithms to predict traffic patterns based on historical data, events, and weather conditions. Provide real-time predictions for traffic congestion and suggest alternative routes.
