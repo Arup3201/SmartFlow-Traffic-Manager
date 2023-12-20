@@ -43,5 +43,5 @@ Artificial Traffic Management System tackles the following problems -
    - **Implementation:** Use optimization algorithms (e.g., linear programming) to create efficient schedules for buses or trains based on demand and real-time conditions.
 
 11. **Emergency Vehicle Priority:**
-    - **Task:** Integrate AI to recognize emergency vehicles and adjust traffic signals to prioritize their movement. Improve response times for emergency services during critical situations.
-    - **Implementation:** Use image processing techniques to identify emergency vehicles from camera feeds and modify signal timings accordingly.
+   - **Task:** Integrate AI to recognize emergency vehicles and adjust traffic signals to prioritize their movement. Improve response times for emergency services during critical situations.
+   - **Implementation:** Use image processing techniques to identify emergency vehicles from camera feeds and modify signal timings accordingly.
