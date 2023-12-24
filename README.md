@@ -12,7 +12,7 @@ SmartFlow Traffic Manager has the following features to help and improve traffic
 
 **Dashboard Access:**
 
-The user logs into the IntelliRoute Traffic Solutions dashboard using secure credentials.
+The user logs into the SmartFlow Traffic Manager dashboard using secure credentials.
 
 **Real-Time Overview:**
 
@@ -58,4 +58,42 @@ The user assesses the overall performance of the traffic management system using
 
 The user collaborates with other traffic management authorities and planners through the system's communication features, sharing insights, best practices, and collectively working towards improving regional traffic management.
 
-# 
+## Problem Framing
+
+- **Traffic Dashboard:**
+  
+  - *Goal:* Show the authorities condition of traffic. Like, 
+    
+    - Today's total traffic count
+    
+    - Time-series data of traffic count
+    
+    - Total Pedestrians coming and going
+    
+    - Each category vehicle data
+    
+    - Traffic flow in each direction
+
+- **Real-Time Overview:**
+  
+  - *Goal:* Show authorities the view of the vehicles and their route. Along with this video feed where vehicles are detected using machine learning, we are also showing a map indicating the path of each of these vehicles.
+  
+  - *ML Problem Framing 1:* Model will learn from images to detect the vehicles in the image and use a bounding box to cover the vehicle detected. Data needed to do this task are available so data will not be an issue. The model that we are going to use is heavy model. So, it will make the process complex and error prone. There will be latency when user actually gets to see the result.
+
+- **Predict Traffic Flow:**
+  
+  - *Goal:* It will forecast the traffic flow according to previous traffic history. User will be able to see the future traffic flow of next *2* hrs.
+  
+  - *ML Problem Framing:* Forecast the traffic flow of next *2* hrs by learning from historical traffic flow data. It will output the volume of traffic and show it in the form of a time-series graph.
+
+- **Dynamic Traffic Signal:**
+  
+  - *Goal:* User will be given suggestions on the optimized singal that should be shown on the road to improve traffic congestion and safety.
+  
+  - *ML Problem Framing:* Building a model that learns to generate the optimized signal taking the traffic situations in mind. And it does this automatically without outside intereferance. This also takes feedbacks which further gets feeded and helps the model improve.
+
+- **Anomaly/Incident Detection:**
+  
+  - *Goal:* When any accident happens on the road, our system should be able to recognize the accident immediately and users will be alerted.
+  
+  - *ML Problem Framing:* Learning from data of accident images and training a model that can differentiate between an image with accident and withour accident.
