@@ -162,7 +162,8 @@ cython_debug/
 # data
 data
 
-# model
+# model data
 *.pt
 *.weights
 *.h5
+*.pb
