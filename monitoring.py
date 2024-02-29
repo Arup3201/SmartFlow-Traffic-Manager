@@ -5,7 +5,6 @@ Usage - sources:
     $ python montitor.py --weights yolov5s.pt --source 'https://www.youtube.com/watch?v=F5Q5ViU8QR0'  # YouTube
 """
 
-import argparse
 import os
 import sys
 from pathlib import Path
@@ -67,7 +66,7 @@ def run(
     # DeepSORT -> Initializing tracker.
     max_cosine_distance = 0.4
     nn_budget = None
-    model_filename = './model_data/mars-small128.pb'
+    model_filename = ROOT / 'model_data/mars-small128.pb'
     encoder = gdet.create_box_encoder(model_filename, batch_size=1)
     metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
     tracker = Tracker(metric)
@@ -167,18 +166,15 @@ def run(
                   bbox = list(track.to_tlbr())
                   traffic_flow.update({track.track_id: [track.label, *bbox]})
 
-            traffic_flow_history.append(traffic_flow)
+                traffic_flow_history.append(traffic_flow)
 
-        # Print the traffic flow data as the model predicts
-        # print(traffic_flow_history)
-        
-        # Yield the traffic flow history for every frame
+        # Return the traffic flow data for every frame
         yield traffic_flow_history
 
 
 def monitor(
         weights=ROOT / "yolov5s.pt",  # model path or triton URL 
-        source=ROOT / "data/images",  # file/dir/URL/glob/screen/0(webcam)
+        source=ROOT / "data/images",  # URL
         data=ROOT / "data/coco128.yaml",  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.5,  # confidence threshold
@@ -195,4 +191,5 @@ def monitor(
         ):
     """Executes YOLOv5 model inference with given options, checking requirements before running the model."""
     check_requirements(ROOT / "requirements.txt", exclude=("tensorboard", "thop"))
-    run(weights, source, data, imgsz, conf_thres, iou_thres, max_det, device, classes, agnostic_nms, augment, visualize, half, dnn, vid_stride)
+    for traffic_flow in run(weights, source, data, imgsz, conf_thres, iou_thres, max_det, device, classes, agnostic_nms, augment, visualize, half, dnn, vid_stride):
+        yield traffic_flow

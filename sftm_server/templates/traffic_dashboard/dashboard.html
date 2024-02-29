@@ -16,10 +16,10 @@
     <div class="container">
         <div class=" row justify-content-center">
             <div class="col-sm-8">
-                <h2>user dashboard</h2>
-                <p><b>Name: </b> {{user.name }}</p>
-                <p><b>Email: </b> {{user.email }}</p>
-                <a href="/logout" class="btn btn-dark">Logout</a>
+                <h2>Dashboard</h2>
+                <p><b>Name: </b>{{g.user['username']}}</p>
+                <p><b>Camera Location: </b> {{g.camera['c_name']}}</p>
+                <a href="{{url_for('auth.logout')}}" class="btn btn-dark">Logout</a>
             </div>
 
         </div>

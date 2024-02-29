@@ -23,4 +23,3 @@ scikit-learn
 tensorflow
 flask_sqlalchemy
 bcrypt
-sqlite

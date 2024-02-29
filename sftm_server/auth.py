@@ -5,13 +5,13 @@ from flask import (
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from sftm.db import get_db
+from sftm_server.db import get_db
 
-bp = Blueprint('auth', __name__, url_prefix='/auth')
+bp = Blueprint('auth', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('auth/authorize.html')
+    return render_template('base.html')
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
@@ -61,7 +61,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect(url_for('main.landing'))
+            return redirect(url_for('location.location'))
 
         flash(error)
 

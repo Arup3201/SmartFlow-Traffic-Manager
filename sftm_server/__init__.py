@@ -8,7 +8,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'sftm.sqlite'),
+        DATABASE=os.path.join(app.instance_path, 'sftm_db.sqlite'),
     )
 
     if test_config is None:
@@ -24,11 +24,13 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import db, auth, landing
+    from . import db, auth, location, landing, dashboard
     db.init_app(app)
     
     app.register_blueprint(auth.bp)
+    app.register_blueprint(location.bp)
     app.register_blueprint(landing.bp)
+    app.register_blueprint(dashboard.bp)
 
     app.add_url_rule('/', endpoint='index')
 
