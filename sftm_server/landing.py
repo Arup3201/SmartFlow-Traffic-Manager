@@ -6,4 +6,4 @@ bp = Blueprint('main', __name__, url_prefix='/main')
 @bp.route('/landing')
 @login_required
 def landing():
-    return render_template('landing/landing.html')
+    return render_template('main/landing.html')

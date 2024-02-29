@@ -19,4 +19,4 @@ def location():
 
         return redirect(url_for('main.landing'))
     
-    return render_template('landing/location.html')
+    return render_template('location.html')

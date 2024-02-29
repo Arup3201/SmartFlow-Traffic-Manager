@@ -17,8 +17,12 @@
         <div class=" row justify-content-center">
             <div class="col-sm-8">
                 <h2>Dashboard</h2>
-                <p><b>Name: </b>{{g.user['username']}}</p>
-                <p><b>Camera Location: </b> {{g.camera['c_name']}}</p>
+                <p><b>User: </b>{{g.user['username']}}</p>
+                <p><b>Camera: </b> {{g.camera['c_name']}}</p>
+                <video class="w-100" preload="auto" src="https://youtube.com/watch?v={{g.camera['yt_id']}}"
+                    type="video/mp4">
+                    Your browser does not support HTML5 video.
+                </video>
                 <a href="{{url_for('auth.logout')}}" class="btn btn-dark">Logout</a>
             </div>
 

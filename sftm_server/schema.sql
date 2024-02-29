@@ -10,12 +10,12 @@ CREATE TABLE user(
 CREATE TABLE camera(
     c_id INTEGER PRIMARY KEY AUTOINCREMENT,
     c_name TEXT NOT NULL UNIQUE,
-    yt_link TEXT UNIQUE
+    yt_id TEXT UNIQUE
 );
 
-INSERT INTO camera (c_name, yt_link) 
+INSERT INTO camera (c_name, yt_id) 
 VALUES 
-('Jackson Hole Wyoming USA Town Square Live Cam', 'https://www.youtube.com/watch?v=1EiC9bvVGnk'), 
-('Sapporo Hokkaido Japan Live 24/7', 'https://www.youtube.com/watch?v=CF1vS8DdBIk'), 
- ('4 Corners Camera Downtown', 'https://www.youtube.com/watch?v=ByED80IKdIU'), 
-('Main Street Livecam, Canmore, Alberta', 'https://www.youtube.com/watch?v=pu6kHxiCSY0');
+('Jackson Hole Wyoming USA Town Square Live Cam', '1EiC9bvVGnk'), 
+('Sapporo Hokkaido Japan Live 24/7', 'CF1vS8DdBIk'), 
+ ('4 Corners Camera Downtown', 'ByED80IKdIU'), 
+('Main Street Livecam, Canmore, Alberta', 'pu6kHxiCSY0');
