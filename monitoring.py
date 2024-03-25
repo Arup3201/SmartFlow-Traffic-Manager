@@ -8,7 +8,6 @@ Usage - sources:
 import os
 import sys
 from pathlib import Path
-
 import torch
 
 import pathlib
@@ -21,7 +20,6 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 # DeepSORT -> Importing DeepSORT.
-from deep_sort.application_util import preprocessing
 from deep_sort.deep_sort import nn_matching
 from deep_sort.deep_sort.detection import Detection
 from deep_sort.deep_sort.tracker import Tracker
@@ -35,29 +33,31 @@ from utils.general import (
     check_imshow,
     check_requirements,
     non_max_suppression,
-    print_args,
     scale_boxes,
 )
 from utils.torch_utils import select_device, smart_inference_mode
 
 @smart_inference_mode()
-def run(
-    weights=ROOT / "yolov5s.pt",  # model path or triton URL
-    source=ROOT / "data/images",  # file/dir/URL/glob/screen/0(webcam)
-    data=ROOT / "data/coco128.yaml",  # dataset.yaml path
-    imgsz=(640, 640),  # inference size (height, width)
-    conf_thres=0.5,  # confidence threshold
-    iou_thres=0.5,  # NMS IOU threshold
-    max_det=1000,  # maximum detections per image
-    device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-    classes=None,  # filter by class: --class 0, or --class 0 2 3
-    agnostic_nms=False,  # class-agnostic NMS
-    augment=False,  # augmented inference
-    visualize=False,  # visualize features
-    half=False,  # use FP16 half-precision inference
-    dnn=False,  # use OpenCV DNN for ONNX inference
-    vid_stride=1,  # video frame-rate stride
-):
+def monitor(
+        weights=ROOT / "yolov5s.pt",  # model path or triton URL 
+        source=ROOT / "data/images",  # URL
+        data=ROOT / "data/coco128.yaml",  # dataset.yaml path
+        imgsz=(640, 640),  # inference size (height, width)
+        conf_thres=0.5,  # confidence threshold
+        iou_thres=0.5,  # NMS IOU threshold
+        max_det=1000,  # maximum detections per image
+        device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        agnostic_nms=False,  # class-agnostic NMS
+        augment=False,  # augmented inference
+        visualize=False,  # visualize features
+        half=False,  # use FP16 half-precision inference
+        dnn=False,  # use OpenCV DNN for ONNX inference
+        vid_stride=1,  # video frame-rate stride
+        ):
+    """Executes YOLOv5 model inference with given options, checking requirements before running the model."""
+    check_requirements(ROOT / "requirements.txt", exclude=("tensorboard", "thop"))
+
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
     webcam = source.isnumeric() or source.endswith(".streams") or (is_url and not is_file)
@@ -170,26 +170,3 @@ def run(
 
         # Return the traffic flow data for every frame
         yield traffic_flow_history
-
-
-def monitor(
-        weights=ROOT / "yolov5s.pt",  # model path or triton URL 
-        source=ROOT / "data/images",  # URL
-        data=ROOT / "data/coco128.yaml",  # dataset.yaml path
-        imgsz=(640, 640),  # inference size (height, width)
-        conf_thres=0.5,  # confidence threshold
-        iou_thres=0.5,  # NMS IOU threshold
-        max_det=1000,  # maximum detections per image
-        device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
-        agnostic_nms=False,  # class-agnostic NMS
-        augment=False,  # augmented inference
-        visualize=False,  # visualize features
-        half=False,  # use FP16 half-precision inference
-        dnn=False,  # use OpenCV DNN for ONNX inference
-        vid_stride=1,  # video frame-rate stride
-        ):
-    """Executes YOLOv5 model inference with given options, checking requirements before running the model."""
-    check_requirements(ROOT / "requirements.txt", exclude=("tensorboard", "thop"))
-    for traffic_flow in run(weights, source, data, imgsz, conf_thres, iou_thres, max_det, device, classes, agnostic_nms, augment, visualize, half, dnn, vid_stride):
-        yield traffic_flow
