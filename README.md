@@ -25,4 +25,5 @@ SmartFlow Traffic Manager aims to solve some of the traffic related issues emerg
 
 ## DEMO
 1. AI-Based Traffic Monitoring on the choosen live camera
+
    ![Demo on traffic monitoring](https://drive.google.com/file/d/1XZEFvlGhJ2kHh5r8cWEEtYBJmZco4Ubs/view?usp=drive_link)
