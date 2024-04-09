@@ -21,9 +21,3 @@ SmartFlow Traffic Manager aims to solve some of the traffic related issues emerg
 **Dynamic Traffic Signal:** System gives traffic signals based on the data it is provided and getting every hour. After getting the traffic signal from the signal, user can apply that suggestion to real-time or it can skip it in case user thinks the signal is not the optimized one based on the current situation.
 
 **Incident Management:** User can get real-time alerts in case any accident is noticed by the system along with information of that accident like location, best route to reach that location. User also has options of sharing this data with responsible authorities or hospitals so that victims can be taken care of immediately.
-
-
-## DEMO
-1. AI-Based Traffic Monitoring on the choosen live camera
-
-   ![Demo on traffic monitoring](https://drive.google.com/file/d/1XZEFvlGhJ2kHh5r8cWEEtYBJmZco4Ubs/view?usp=drive_link)
