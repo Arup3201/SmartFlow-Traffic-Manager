@@ -12,32 +12,28 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
 </head>
 
+<style>
+    .video-container {
+        width: 60rem;
+    }
+</style>
+
 <body>
 
     <div class="container">
-        <div class=" row justify-content-center">
+        <div class="row justify-content-center">
             <div class="col-sm-8">
                 <h2>Dashboard</h2>
                 <p><b>User: </b>{{g.user['username']}}</p>
                 <p><b>Camera: </b> {{g.camera['c_name']}}</p>
 
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe id="player" class="embed-responsive-item"
-                        src="https://youtube.com/embed/{{g.camera['yt_id']}}?controls=0&autoplay=1&mute=1&rel=0&enablejsapi=1"
-                        frameborder="0" allowfullscreen></iframe>
-                </div>
+                <img class="video-container" src="http://127.0.0.1:5000/object_tracking"
+                    alt="video tracking on youtube video" />
+
                 <a href="/logout" class="btn btn-dark">Logout</a>
             </div>
         </div>
     </div>
 </body>
-<script>
-    socket = io.connect("http://localhost:5000")
-
-    socket.on("data", function (event) {
-        console.log(event)
-    })
-
-</script>
 
 </html>

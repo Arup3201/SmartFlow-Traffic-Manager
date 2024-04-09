@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 try:
     import comet_ml
-except ImportError:
+except (ModuleNotFoundError, ImportError):
     comet_ml = None
 
 import yaml
@@ -17,7 +17,6 @@ COMET_DEFAULT_CHECKPOINT_FILENAME = os.getenv("COMET_DEFAULT_CHECKPOINT_FILENAME
 
 
 def download_model_checkpoint(opt, experiment):
-    """Downloads YOLOv5 model checkpoint from Comet ML experiment, updating `opt.weights` with download path."""
     model_dir = f"{opt.project}/{experiment.name}"
     os.makedirs(model_dir, exist_ok=True)
 
@@ -65,8 +64,8 @@ def download_model_checkpoint(opt, experiment):
 
 
 def set_opt_parameters(opt, experiment):
-    """
-    Update the opts Namespace with parameters from Comet's ExistingExperiment when resuming a run.
+    """Update the opts Namespace with parameters
+    from Comet's ExistingExperiment when resuming a run
 
     Args:
         opt (argparse.Namespace): Namespace of command line options
@@ -96,8 +95,8 @@ def set_opt_parameters(opt, experiment):
 
 
 def check_comet_weights(opt):
-    """
-    Downloads model weights from Comet and updates the weights path to point to saved weights location.
+    """Downloads model weights from Comet and updates the
+    weights path to point to saved weights location
 
     Args:
         opt (argparse.Namespace): Command Line arguments passed
@@ -110,20 +109,21 @@ def check_comet_weights(opt):
     if comet_ml is None:
         return
 
-    if isinstance(opt.weights, str) and opt.weights.startswith(COMET_PREFIX):
-        api = comet_ml.API()
-        resource = urlparse(opt.weights)
-        experiment_path = f"{resource.netloc}{resource.path}"
-        experiment = api.get(experiment_path)
-        download_model_checkpoint(opt, experiment)
-        return True
+    if isinstance(opt.weights, str):
+        if opt.weights.startswith(COMET_PREFIX):
+            api = comet_ml.API()
+            resource = urlparse(opt.weights)
+            experiment_path = f"{resource.netloc}{resource.path}"
+            experiment = api.get(experiment_path)
+            download_model_checkpoint(opt, experiment)
+            return True
 
     return None
 
 
 def check_comet_resume(opt):
-    """
-    Restores run parameters to its original state based on the model checkpoint and logged Experiment parameters.
+    """Restores run parameters to its original state based on the model checkpoint
+    and logged Experiment parameters.
 
     Args:
         opt (argparse.Namespace): Command Line arguments passed
@@ -136,14 +136,15 @@ def check_comet_resume(opt):
     if comet_ml is None:
         return
 
-    if isinstance(opt.resume, str) and opt.resume.startswith(COMET_PREFIX):
-        api = comet_ml.API()
-        resource = urlparse(opt.resume)
-        experiment_path = f"{resource.netloc}{resource.path}"
-        experiment = api.get(experiment_path)
-        set_opt_parameters(opt, experiment)
-        download_model_checkpoint(opt, experiment)
+    if isinstance(opt.resume, str):
+        if opt.resume.startswith(COMET_PREFIX):
+            api = comet_ml.API()
+            resource = urlparse(opt.resume)
+            experiment_path = f"{resource.netloc}{resource.path}"
+            experiment = api.get(experiment_path)
+            set_opt_parameters(opt, experiment)
+            download_model_checkpoint(opt, experiment)
 
-        return True
+            return True
 
     return None
