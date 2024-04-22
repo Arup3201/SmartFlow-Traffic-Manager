@@ -2,38 +2,135 @@
 <html lang="en">
 
 <head>
-    <title>SmartFlow Traffic Manager - Dashboard</title>
+    <title>Dashboard - SmartFlow Traffic Manager</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+    <link href="static/vendor/quill/quill.snow.css" rel="stylesheet">
+    <link href="static/vendor/quill/quill.bubble.css" rel="stylesheet">
+    <link href="static/vendor/remixicon/remixicon.css" rel="stylesheet">
+    <link href="static/vendor/simple-datatables/style.css" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="static/css/style.css" rel="stylesheet">
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
 </head>
 
-<style>
-    .video-container {
-        width: 60rem;
-    }
-</style>
-
 <body>
+    <header id="header" class="fixed-top ">
+        <div class="container d-flex align-items-center">
 
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-sm-8">
-                <h2>Dashboard</h2>
-                <p><b>User: </b>{{g.user['username']}}</p>
-                <p><b>Camera: </b> {{g.camera['c_name']}}</p>
+            <h1 class="logo me-auto">SmartFlow Traffic Manager</h1>
+            <!-- Uncomment below if you prefer to use an image logo -->
+            <!-- <a href="index.html" class="logo me-auto"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
 
-                <img class="video-container" src="http://127.0.0.1:5000/object_tracking"
-                    alt="video tracking on youtube video" />
+            <nav id="navbar" class="navbar">
+                <ul>
+                    <li><a class="nav-link" href="/landing">Home</a></li>
+                    <li><a class="nav-link active" href="/dashboard">Dashboard</a></li>
+                    <li><a class="nav-link" href="/accident_management">Accident Management</a></li>
+                    <li><a class="nav-link" href="/traffic_analysis">Traffic Analysis</a></li>
+                    <li><a class="nav-link" href="/team">Team</a></li>
+                    <li><a class="nav-link" href="/contact">Contact</a></li>
+                    <li class="nav-item dropdown pe-3">
 
-                <a href="/logout" class="btn btn-dark">Logout</a>
-            </div>
+                        <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#"
+                            data-bs-toggle="dropdown">
+                            <ion-icon name="person-circle-outline"></ion-icon>
+                            <span class="d-none d-md-block dropdown-toggle ps-2">Account</span>
+                        </a><!-- End Profile Iamge Icon -->
+
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+                            <li class="dropdown-header">
+                                <h6>User Name: {{g.user['username']}}</h6>
+                                <span>Camera: {{g.camera['c_name']}}</span>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center" href="/logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </li>
+
+                        </ul><!-- End Profile Dropdown Items -->
+                    </li><!-- End Profile Nav -->
+                </ul>
+                <i class="bi bi-list mobile-nav-toggle"></i>
+            </nav><!-- .navbar -->
+
         </div>
-    </div>
+    </header><!-- End Header -->
+
+    <main id="main" class="main">
+
+        <div class="pagetitle">
+            <h1>Dashboard</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/landing">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </nav>
+        </div><!-- End Page Title -->
+
+        <section class="section dashboard">
+            <div class="row">
+                <div class="col-xxl-4 col-md-6">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Traffic Volume <span>| Today</span></h5>
+
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-cart"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6>145</h6>
+                                    <span class="text-success small pt-1 fw-bold">12%</span> <span
+                                        class="text-muted small pt-2 ps-1">increase</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Sales Card -->
+            </div>
+
+            <div class="col-xxl-4 col-md-6">
+                <div class="card info-card revenue-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Congestion <span>| Today</span></h5>
+
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-currency-dollar"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>6</h6>
+                                <span class="text-success small pt-1 fw-bold">8%</span> <span
+                                    class="text-muted small pt-2 ps-1">increase</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- End Revenue Card -->
+
+        </section>
+    </main><!-- End #main -->
 </body>
 
 </html>
