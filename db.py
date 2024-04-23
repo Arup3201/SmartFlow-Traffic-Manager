@@ -1,5 +1,4 @@
 from flask import current_app, g
-import click
 import sqlite3
 
 def get_db():
@@ -19,19 +18,7 @@ def close_db(e=None):
         db.close()
 
 def init_db():
-    # Ask the user
-    response = input("Are you sure you want to delete the previous database data?")
-    if response.lower() == "yes":
-        db = get_db()
+    db = get_db()
 
-        with current_app.open_resource('schema.sql') as f:
-            db.executescript(f.read().decode('utf8'))
-
-
-def init_db_command():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
-
-if __name__=="__main__":
-    init_db_command()
+    with current_app.open_resource('schema.sql') as f:
+        db.executescript(f.read().decode('utf8'))

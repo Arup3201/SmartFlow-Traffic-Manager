@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, session, flash, redirect, g, Response
+from flask import Flask, render_template, request, session, flash, redirect, g
+import click
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
-from db import get_db, init_app
+from db import get_db, init_db
 from ultralytics import YOLO
 from ultralytics.solutions import speed_estimation
 import pafy
@@ -160,8 +161,6 @@ app.config.from_mapping(
         DATABASE=os.path.join(app.instance_path, 'sftm_db.sqlite')
     )
 
-camera = None
-
 @app.route('/')
 def index():
     return render_template("base.html")
@@ -214,7 +213,7 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return redirect('/location')
+            return redirect('/landing_page')
 
         flash(error)
 
@@ -231,18 +230,6 @@ def load_logged_in_user():
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
 
-    camera_id = session.get('camera_id')
-    
-    if camera_id is None:
-        g.camera = None
-    else:
-        g.camera = get_db().execute(
-            'SELECT * FROM camera WHERE c_id=?', (camera_id, )
-        ).fetchone()
-        
-    global camera
-    camera = g.camera
-
 def login_required(view):
     @functools.wraps(view)
     def wrapped_view(**kwargs):
@@ -251,11 +238,6 @@ def login_required(view):
 
         return view(**kwargs)
     return wrapped_view
-
-@app.route('/location')
-@login_required
-def location():
-    return render_template('location.html')
 
 @app.route('/landing_page', methods=('GET', 'POST'))
 @login_required
@@ -274,26 +256,26 @@ def landing_page():
 def dashboard():
     return render_template('dashboard.html')
 
-def gen_tracking_frame():
-    global camera
-    
-    for _, frame in get_traffic_information(url="https://www.youtube.com/watch?v=F5Q5ViU8QR0"):
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-@app.route('/object_tracking')
-@login_required
-def object_tracking():
-    return Response(gen_tracking_frame(), mimetype="multipart/x-mixed-replace; boundary=frame")
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect('/')
 
-if __name__=="__main__":
+def clear_initialize_db():
+    """Clear the existing data and create new tables."""
+    init_db()
+    click.echo('Initialized the database.')
+
+if __name__=="__main__":    
+    if not os.path.exists(app.config['DATABASE']):
+        clear_initialize_db()
+    else:
+        q = input("Do you want to delete all previous records and start from new?")
+        if q.lower() == 'yes':
+            clear_initialize_db()
+
+    # Start the object monitoring and saving
     thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0'], daemon=True)
     thread.start()
-    
-    init_app(app)
+
     app.run(host="0.0.0.0", port="5000", debug=True)
