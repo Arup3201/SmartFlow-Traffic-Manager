@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, session, flash, redirect, g
+import sqlite3
 import click
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
-from db import get_db, init_db
 from ultralytics import YOLO
 from ultralytics.solutions import speed_estimation
 import pafy
@@ -261,17 +261,45 @@ def logout():
     session.clear()
     return redirect('/')
 
+# Database code
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(
+            app.config['DATABASE'], 
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
+        g.db.row_factory = sqlite3.Row
+
+    return g.db
+
+def close_db(e=None):
+    with app.app_context():
+        db = g.pop('db', None)
+
+        if db is not None:
+            db.close()
+
+def init_db():
+    with app.app_context():
+        db = get_db()
+
+        with app.open_resource('schema.sql') as f:
+            db.executescript(f.read().decode('utf8'))
+
 def clear_initialize_db():
     """Clear the existing data and create new tables."""
     init_db()
     click.echo('Initialized the database.')
 
+
 if __name__=="__main__":    
     if not os.path.exists(app.config['DATABASE']):
+        close_db()
         clear_initialize_db()
     else:
         q = input("Do you want to delete all previous records and start from new?")
         if q.lower() == 'yes':
+            close_db()
             clear_initialize_db()
 
     # Start the object monitoring and saving
