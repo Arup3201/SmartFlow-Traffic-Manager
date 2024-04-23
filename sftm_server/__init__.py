@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, session, flash, redirect, g
-import sqlite3
-import click
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
@@ -12,6 +10,7 @@ import numpy as np
 from time import time
 from ultralytics.utils.plotting import Annotator
 from threading import Thread
+from .db import get_db, traffic_db, init_app
 
 # Tracking, Speed Estimation
 MODEL_PATH = 'yolov8n.pt'
@@ -99,12 +98,13 @@ class CustomSpeedEstimator(speed_estimation.SpeedEstimator):
         return im0
 
 
-
 def set_traffic_info():
     # {class_name: [count, average_speed]}
     return {'person': [0, 0], 'car': [0, 0], 'bicycle': [0, 0], 'bus': [0, 0], 'motorcycle': [0, 0], 'truck': [0, 0]}
 
 def save_traffic_information(url, show=False):
+    print("INSIDE SAVE TRAFFIC INFORMATION...")
+
     # Get the model
     model = YOLO(MODEL_PATH)
 
@@ -144,9 +144,12 @@ def save_traffic_information(url, show=False):
             if value[0]:
                 traffic_info[key][1] = value[1] / value[0]
 
+        # TEST
+        # print(traffic_info)
+
         # Save the traffic information in the database
         if not show:
-            pass
+            traffic_db(traffic_info=traffic_info)
 
         # Reset the traffic volume for next iteration
         traffic_info = set_traffic_info()
@@ -154,156 +157,131 @@ def save_traffic_information(url, show=False):
         if show:
             yield result
 
-# Flask Application
-app = Flask(__name__)
-app.config.from_mapping(
+def create_app(test_config=None):
+    # create and configure the app
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
         SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'sftm_db.sqlite')
+        DATABASE=os.path.join(app.instance_path, 'sftm.sqlite'),
     )
 
-@app.route('/')
-def index():
-    return render_template("base.html")
-
-@app.route('/register', methods=('GET', 'POST'))
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
-
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-
-        if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password)),
-                )
-                db.commit()
-            except db.IntegrityError:
-                error = f"User {username} is already registered."
-            else:
-                return render_template('login.html')
-
-        flash(error)
-
-    return render_template('register.html')
-
-@app.route('/login', methods=('GET', 'POST'))
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        db = get_db()
-        error = None
-        user = db.execute(
-            'SELECT * FROM user WHERE username = ?', (username,)
-        ).fetchone()
-
-        if user is None:
-            error = 'Incorrect username.'
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
-
-        if error is None:
-            session.clear()
-            session['user_id'] = user['id']
-            return redirect('/landing_page')
-
-        flash(error)
-
-    return render_template('login.html')
-
-@app.before_request
-def load_logged_in_user():
-    user_id = session.get('user_id')
-
-    if user_id is None:
-        g.user = None
+    if test_config is None:
+        # load the instance config, if it exists, when not testing
+        app.config.from_pyfile('config.py', silent=True)
     else:
-        g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?', (user_id,)
-        ).fetchone()
+        # load the test config if passed in
+        app.config.from_mapping(test_config)
 
-def login_required(view):
-    @functools.wraps(view)
-    def wrapped_view(**kwargs):
-        if g.user is None:
-            return redirect('/login')
+    # ensure the instance folder exists
+    try:
+        os.makedirs(app.instance_path)
+    except OSError:
+        pass
 
-        return view(**kwargs)
-    return wrapped_view
+    @app.route('/')
+    def index():
+        return render_template("base.html")
 
-@app.route('/landing_page', methods=('GET', 'POST'))
-@login_required
-def landing_page():
-    if request.method == "POST":
-        loc = request.form['choice']
-        camera = get_db().execute(
-            'SELECT * FROM camera WHERE c_name = ?', (loc,)
-        ).fetchone()
-        
-        session['camera_id'] = camera['c_id']
+    @app.route('/register', methods=('GET', 'POST'))
+    def register():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            db = get_db()
+            error = None
 
-    return render_template('landing.html')
+            if not username:
+                error = 'Username is required.'
+            elif not password:
+                error = 'Password is required.'
 
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
+            if error is None:
+                try:
+                    db.execute(
+                        "INSERT INTO user (username, password) VALUES (?, ?)",
+                        (username, generate_password_hash(password)),
+                    )
+                    db.commit()
+                except db.IntegrityError:
+                    error = f"User {username} is already registered."
+                else:
+                    return render_template('login.html')
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/')
+            flash(error)
 
-# Database code
-def get_db():
-    if 'db' not in g:
-        g.db = sqlite3.connect(
-            app.config['DATABASE'], 
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = sqlite3.Row
+        return render_template('register.html')
 
-    return g.db
+    @app.route('/login', methods=('GET', 'POST'))
+    def login():
+        if request.method == 'POST':
+            username = request.form['username']
+            password = request.form['password']
+            db = get_db()
+            error = None
+            user = db.execute(
+                'SELECT * FROM user WHERE username = ?', (username,)
+            ).fetchone()
 
-def close_db(e=None):
-    with app.app_context():
-        db = g.pop('db', None)
+            if user is None:
+                error = 'Incorrect username.'
+            elif not check_password_hash(user['password'], password):
+                error = 'Incorrect password.'
 
-        if db is not None:
-            db.close()
+            if error is None:
+                session.clear()
+                session['user_id'] = user['id']
+                return redirect('/landing_page')
 
-def init_db():
-    with app.app_context():
-        db = get_db()
+            flash(error)
 
-        with app.open_resource('schema.sql') as f:
-            db.executescript(f.read().decode('utf8'))
+        return render_template('login.html')
 
-def clear_initialize_db():
-    """Clear the existing data and create new tables."""
-    init_db()
-    click.echo('Initialized the database.')
+    @app.before_request
+    def load_logged_in_user():
+        user_id = session.get('user_id')
 
+        if user_id is None:
+            g.user = None
+        else:
+            g.user = get_db().execute(
+                'SELECT * FROM user WHERE id = ?', (user_id,)
+            ).fetchone()
 
-if __name__=="__main__":    
-    if not os.path.exists(app.config['DATABASE']):
-        close_db()
-        clear_initialize_db()
-    else:
-        q = input("Do you want to delete all previous records and start from new?")
-        if q.lower() == 'yes':
-            close_db()
-            clear_initialize_db()
+    def login_required(view):
+        @functools.wraps(view)
+        def wrapped_view(**kwargs):
+            if g.user is None:
+                return redirect('/login')
+
+            return view(**kwargs)
+        return wrapped_view
+
+    @app.route('/landing_page', methods=('GET', 'POST'))
+    @login_required
+    def landing_page():
+        if request.method == "POST":
+            loc = request.form['choice']
+            camera = get_db().execute(
+                'SELECT * FROM camera WHERE c_name = ?', (loc,)
+            ).fetchone()
+            
+            session['camera_id'] = camera['c_id']
+
+        return render_template('landing.html')
+
+    @app.route('/dashboard')
+    def dashboard():
+        return render_template('dashboard.html')
+
+    @app.route('/logout')
+    def logout():
+        session.clear()
+        return redirect('/')
+
+    init_app(app)
 
     # Start the object monitoring and saving
-    thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0'], daemon=True)
+    thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0'], daemon=False)
     thread.start()
 
-    app.run(host="0.0.0.0", port="5000", debug=True)
+    return app
