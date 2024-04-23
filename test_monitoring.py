@@ -4,8 +4,24 @@ import cv2 as cv
 import pafy
 import numpy as np
 
-import time
+from time import time
 from ultralytics.utils.plotting import Annotator
+
+MODEL_PATH = 'yolov8n.pt'
+
+# Find whether a point is at right or left of a line
+def find_direction_wrt_line(x, y, p):
+    xp_vector = (p[0]-x[0], p[1]-x[1])
+    xy_vector = (y[0]-x[0], y[1]-p[1])
+
+    cross_product = (xp_vector[0] * xy_vector[1]) - (xp_vector[1] * xy_vector[0])
+
+    if cross_product > 0:
+        direction = -1 # left
+    elif cross_product < 0:
+        direction = 1 # right
+
+    return direction
 
 # Build a customer speed estimator to get speed for all objects inside the 4 point region
 class CustomSpeedEstimator(speed_estimation.SpeedEstimator):
@@ -22,16 +38,8 @@ class CustomSpeedEstimator(speed_estimation.SpeedEstimator):
             track (list): tracking history for tracks path drawing
         """
 
-        if not ((self.reg_pts[0][0] < track[-1][0] < self.reg_pts[1][0]) and(self.reg_pts[2][0] < track[-1][0] < self.reg_pts[3][0])):
-            return
-        
-        if self.reg_pts[3][1] - self.spdl_dist_thresh < track[-1][1] < self.reg_pts[3][1] + self.spdl_dist_thresh:
-            direction = "known"
-        elif self.reg_pts[2][1] - self.spdl_dist_thresh < track[-1][1] < self.reg_pts[2][1] + self.spdl_dist_thresh:
-            direction = "known"
-        elif self.reg_pts[1][1] - self.spdl_dist_thresh < track[-1][1] < self.reg_pts[1][1] + self.spdl_dist_thresh:
-            direction = "known"
-        elif self.reg_pts[0][1] - self.spdl_dist_thresh < track[-1][1] < self.reg_pts[0][1] + self.spdl_dist_thresh:
+        # Left to AB, BC, CD, DA vector
+        if find_direction_wrt_line(self.reg_pts[0], self.reg_pts[1], track[-1]) < 0 and find_direction_wrt_line(self.reg_pts[1], self.reg_pts[2], track[-1]) < 0 and find_direction_wrt_line(self.reg_pts[2], self.reg_pts[3], track[-1]) < 0 and find_direction_wrt_line(self.reg_pts[3], self.reg_pts[0], track[-1]) < 0:
             direction = "known"
         else:
             direction = "unknown"
@@ -86,11 +94,12 @@ class CustomSpeedEstimator(speed_estimation.SpeedEstimator):
 
 
 def set_traffic_info():
+    # {class_name: [count, average_speed]}
     return {'person': [0, 0], 'car': [0, 0], 'bicycle': [0, 0], 'bus': [0, 0], 'motorcycle': [0, 0], 'truck': [0, 0]}
 
 def main():
     # Get the model
-    model = YOLO('yolov8m.pt')
+    model = YOLO(MODEL_PATH)
 
     # Open the video using pafy and OpenCV
     url = "https://www.youtube.com/watch?v=F5Q5ViU8QR0"
@@ -100,13 +109,10 @@ def main():
    
     # Speed estimation
     w, h = cap.get(3), cap.get(4)
-    print(w, h)
     region_pts = [(w*0.2, h*0.6), (w*0.25, h*0.7), (w*0.99, h*0.65), (w*0.8, h*0.55)]
-    # region_pts = [(w*0.2, h*0.6), (w*0.25, h*0.7)]
     speed_obj = CustomSpeedEstimator()
     speed_obj.set_args(reg_pts=region_pts, 
-                       names=model.names, 
-                       view_img=True)
+                       names=model.names)
 
     # dictionaries for storing traffic data which has traffic count and estimated average speed
     id2class = {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 5: 'bus', 7: 'truck'}
@@ -123,14 +129,14 @@ def main():
 
         # Calculate the total no of objects from each class and sum of speeds
         for tracking_obj in speed_obj.tracking_objs:
-            _, obj_cls, obj_speed = tracking_obj
-
+            obj_cls, obj_speed = tracking_obj['class'], tracking_obj['speed']
             traffic_info[id2class[int(obj_cls)]][0] += 1
             traffic_info[id2class[int(obj_cls)]][1] += obj_speed
         
         # Calculate the average speed
         for key, value in traffic_info.items():
-            traffic_info[key][1] = value[1] / value[0]
+            if value[0]:
+                traffic_info[key][1] = value[1] / value[0]
 
         print(traffic_info)
 
