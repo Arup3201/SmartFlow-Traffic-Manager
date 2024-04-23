@@ -23,5 +23,13 @@ SmartFlow Traffic Manager aims to solve some of the traffic related issues emerg
 **Incident Management:** User can get real-time alerts in case any accident is noticed by the system along with information of that accident like location, best route to reach that location. User also has options of sharing this data with responsible authorities or hospitals so that victims can be taken care of immediately.
 
 ## How to Run
-**Download anaconda**
-1. 
+1. Download Anaconda.
+2. Run the git comman in git bash - `!git clone https://github.com/Arup3201/SmartFlow-Traffic-Manager.git`.
+3. Get inside the `SmartFlow-Traffic-Manager` folder.
+4. Open terminal.
+5. Run the command `python -m venv .venv`.
+6. Then, run the command `./.venv/Scripts/activate`.
+7. Then `pip install -r requirements.txt`. It will take some time to install all packages, wait for some time.
+8. Finally when completely downloaded run `flask --app sftm_server init-db`.
+9. Then, Run `flask --app sftm_server run --debug --port=5000`.
+10. Open your browser and type `127.0.0.1:5000`.
