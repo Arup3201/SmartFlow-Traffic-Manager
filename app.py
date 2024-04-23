@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, flash, redirect, g, 
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
-from db import get_db
+from db import get_db, init_app
 from ultralytics import YOLO
 from ultralytics.solutions import speed_estimation
 import pafy
@@ -295,4 +295,5 @@ if __name__=="__main__":
     thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0'], daemon=True)
     thread.start()
     
+    init_app(app)
     app.run(host="0.0.0.0", port="5000", debug=True)

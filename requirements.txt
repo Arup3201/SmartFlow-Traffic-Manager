@@ -10,6 +10,7 @@ requests
 scipy
 thop
 tensorflow
+wurlitzer
 tqdm
 tensorboard
 pandas

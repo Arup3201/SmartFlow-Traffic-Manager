@@ -28,12 +28,10 @@ def init_db():
             db.executescript(f.read().decode('utf8'))
 
 
-@click.command('init-db')
 def init_db_command():
     """Clear the existing data and create new tables."""
     init_db()
     click.echo('Initialized the database.')
 
-def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db_command)
+if __name__=="__main__":
+    init_db_command()
