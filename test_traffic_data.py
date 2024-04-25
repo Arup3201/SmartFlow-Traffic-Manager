@@ -8,8 +8,12 @@ def fetch_traffic_information():
         'SELECT * FROM traffic'
     ).fetchall()
 
-    return traffic_information
+    data = []
+    for ti in traffic_information:
+        # data.append(ti['datetime'], ti['pedestrian_count'], ti['bicycle_count'], ti['bus_count'], ti['car_count'], ti['motorcycle_count'], ti['truck_count'], ti['pedestrian_count'], ti['car_speed'], ti['bicycle_speed'], ti['bus_speed'], ti['car_speed'], ti['motorcycle_speed'], ti['truck_speed'], ti['volume'], ti['congestion'])
+        data.append(ti['volume'])
 
+    return data
 
 if __name__ == "__main__":
     data = fetch_traffic_information()

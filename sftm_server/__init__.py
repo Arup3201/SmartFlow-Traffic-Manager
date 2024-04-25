@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, flash, redirect, g
+from flask import Flask, render_template, current_app, request, session, flash, redirect, g, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
@@ -8,11 +8,12 @@ import pafy
 import cv2
 import numpy as np
 from time import time
+import datetime
 from ultralytics.utils.plotting import Annotator
 from threading import Thread
 from .db import get_db, traffic_db, init_app
 
-# Tracking, Speed Estimation
+# Model path
 MODEL_PATH = 'yolov8n.pt'
 
 # Find whether a point is at right or left of a line
@@ -102,8 +103,10 @@ def set_traffic_info():
     # {class_name: [count, average_speed]}
     return {'person': [0, 0], 'car': [0, 0], 'bicycle': [0, 0], 'bus': [0, 0], 'motorcycle': [0, 0], 'truck': [0, 0]}
 
-def save_traffic_information(url, show=False):
-    print("INSIDE SAVE TRAFFIC INFORMATION...")
+def save_traffic_information(url, app_context):
+    print("SAVING TRAFFIC INFORMATION INTO DATABASE ...")
+
+    app_context.push()
 
     # Get the model
     model = YOLO(MODEL_PATH)
@@ -112,13 +115,13 @@ def save_traffic_information(url, show=False):
     video_url = pafy.new(url).getbest(preftype="mp4").url
     cap = cv2.VideoCapture(video_url)
     assert cap.isOpened(), f"Failed to open {video_url}"
-   
+
     # Speed estimation
     w, h = cap.get(3), cap.get(4)
     region_pts = [(w*0.2, h*0.6), (w*0.25, h*0.7), (w*0.99, h*0.65), (w*0.8, h*0.55)]
     speed_obj = CustomSpeedEstimator()
     speed_obj.set_args(reg_pts=region_pts, 
-                       names=model.names)
+                    names=model.names)
 
     # dictionaries for storing traffic data which has traffic count and estimated average speed
     id2class = {0: 'person', 1: 'bicycle', 2: 'car', 3: 'motorcycle', 5: 'bus', 7: 'truck'}
@@ -144,18 +147,12 @@ def save_traffic_information(url, show=False):
             if value[0]:
                 traffic_info[key][1] = value[1] / value[0]
 
-        # TEST
-        # print(traffic_info)
-
         # Save the traffic information in the database
-        if not show:
-            traffic_db(traffic_info=traffic_info)
+        traffic_db(traffic_info=traffic_info)
 
         # Reset the traffic volume for next iteration
         traffic_info = set_traffic_info()
 
-        if show:
-            yield result
 
 def create_app(test_config=None):
     # create and configure the app
@@ -270,8 +267,230 @@ def create_app(test_config=None):
         return render_template('landing.html')
 
     @app.route('/dashboard')
+    @login_required
     def dashboard():
         return render_template('dashboard.html')
+
+    @app.route('/get_div_data')
+    @login_required
+    def get_div_data():
+        data = [
+            {
+                'amount': 0, 
+                'percentage': 0,
+                'change': ''
+            }, 
+            {
+                'amount': 0, 
+                'percentage': 0,
+                'change': ''
+            }, 
+            {
+                'congestion-level': '', 
+                'change': ''
+            }
+        ]
+
+        db = get_db()
+        today_traffic = db.execute(
+            '''SELECT ROUND(AVG(pedestrian_count+car_count+bus_count+bicycle_count+motorcycle_count+truck_count)) AS avg_traffic_count, ROUND(AVG(volume)) AS avg_volume, MAX(congestion) AS overall_congestion 
+            FROM traffic 
+            WHERE date_time LIKE (?)''', (datetime.date.today().strftime("%Y-%m-%d")+'%', )).fetchone()
+        yesterday_traffic = db.execute(
+            '''SELECT ROUND(AVG(pedestrian_count+car_count+bus_count+bicycle_count+motorcycle_count+truck_count)) AS avg_traffic_count,ROUND(AVG(volume)) AS avg_volume, MAX(congestion) AS overall_congestion 
+            FROM traffic 
+            WHERE date_time LIKE (?)''', ((datetime.date.today()-datetime.timedelta(days=1)).strftime("%Y-%m-%d")+'%', )).fetchone()
+        
+        data[0]['amount'] = today_traffic['avg_volume']
+        data[0]['percentage'] = round(((today_traffic['avg_volume'] - yesterday_traffic['avg_volume']) / yesterday_traffic['avg_volume']) * 100, 1)
+        data[0]['change'] = 'increase' if data[0]['percentage'] > 0 else 'decrease'
+        
+        data[1]['amount'] = today_traffic['avg_traffic_count']
+        data[1]['percentage'] = round(((today_traffic['avg_traffic_count'] - yesterday_traffic['avg_traffic_count']) / yesterday_traffic['avg_traffic_count']) * 100, 1)
+        data[1]['change'] = 'increase' if data[1]['percentage'] > 0 else 'decrease'
+        
+        congestion_levels = ['Low', 'Medium', 'High']
+        data[2]['congestion-level'] = congestion_levels[today_traffic['overall_congestion']]
+        data[2]['change'] = 'Higher than yesterday' if today_traffic['overall_congestion'] > yesterday_traffic['overall_congestion'] else 'Lower or equal to yesterday'
+        
+        print(data)
+        return data
+
+    @app.route('/line_chart_data')
+    @login_required
+    def line_chart_data():
+        db = get_db()
+        
+        series_data = [
+            {
+                'name': 'Pedestrian', 
+                'data': []
+            }, 
+            {
+                'name': 'Car', 
+                'data': []
+            }, 
+            {
+                'name': 'Bus', 
+                'data': []
+            }, 
+            {
+                'name': 'Bicycle', 
+                'data': []
+            }, 
+            {
+                'name': 'Motorcycle', 
+                'data': []
+            }, 
+            {
+                'name': 'Truck', 
+                'data': []
+            }, 
+            {
+                'name': 'Traffic Volume', 
+                'data': []
+            }
+        ]
+        
+        for hour in range(24):
+            def get_avg_in_db(string):
+                data = db.execute(
+                    f"SELECT ROUND(AVG({string})) AS avg_{string} FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+f' {hour:0>2}%', )
+                ).fetchone()
+                return data[f'avg_{string}'] if data[f'avg_{string}'] else 0
+        
+            series_data[0]['data'].append(get_avg_in_db('pedestrian_count'))
+            series_data[1]['data'].append(get_avg_in_db('car_count'))
+            series_data[2]['data'].append(get_avg_in_db('bus_count'))
+            series_data[3]['data'].append(get_avg_in_db('bicycle_count'))
+            series_data[4]['data'].append(get_avg_in_db('motorcycle_count'))
+            series_data[5]['data'].append(get_avg_in_db('truck_count'))
+            series_data[6]['data'].append(get_avg_in_db('volume'))
+            
+        categories = [f'{hour:0>2}:00' for hour in range(24)]
+
+        print([{
+            'series_data': series_data, 
+            'categories': categories, 
+
+        }])
+
+        return jsonify([{
+            'series_data': series_data, 
+            'categories': categories, 
+
+        }])
+
+    @app.route('/angular_chart_data')
+    @login_required
+    def angular_chart_data():
+        data = [{
+                    'value': [],
+                    'name': 'Average Speed'
+                },
+                {
+                    'value': [],
+                    'name': 'Total Count'
+                }]
+        
+        db = get_db()
+        
+        def get_avg_in_db(string):
+            data = db.execute(
+                f"SELECT ROUND(AVG({string})) AS avg_{string}                 FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+'%', )
+            ).fetchone()
+            return data[f'avg_{string}'] if data[f'avg_{string}'] else 0
+            
+        objs = ['pedestrian', 'car', 'bus', 'bicycle', 'motorcycle', 'truck']
+        for ob in objs:
+            data[0]['value'].append(get_avg_in_db(f'{ob}_speed'))
+            data[1]['value'].append(get_avg_in_db(f'{ob}_count'))
+        
+        print(data)
+        return jsonify(data)
+
+    @app.route('/pie_chart_data')
+    @login_required
+    def pie_chart_data():
+        data = [{
+                'value': 0,
+                'name': 'Pedestrian'
+                },
+                {
+                    'value': 0,
+                    'name': 'Car'
+                },
+                {
+                    'value': 0,
+                    'name': 'Bus'
+                },
+                {
+                    'value': 0,
+                    'name': 'Bicycle'
+                },
+                {
+                    'value': 0,
+                    'name': 'Motorcycle'
+                }, 
+                {
+                    'value': 0,
+                    'name': 'Truck'
+                }]
+        
+        db = get_db()
+        def get_volume_in_db(string):
+            data = db.execute(
+                f"SELECT ROUND(AVG({string}_count) * AVG({string}_speed)) AS {string}_volume FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+'%', )
+            ).fetchone()
+            return data[f'{string}_volume'] if data[f'{string}_volume'] else 0
+        
+        objs = ['pedestrian', 'car', 'bus', 'bicycle', 'motorcycle', 'truck']
+        for i, ob in enumerate(objs):
+            data[i]['value'] = get_volume_in_db(ob)
+        
+        print(data)
+        return jsonify(data)
+
+    @app.route('/highest_traffic')
+    def highest_traffic():
+        data = []
+        
+        db = get_db()
+        
+        highest_traffic_rows = db.execute(
+            '''SELECT strftime ('%H', date_time) AS hour_day, ROUND(AVG(volume), 2) as volume, ROUND(AVG(pedestrian_speed+car_speed+bus_speed+bicycle_speed+motorcycle_speed+truck_speed)) AS avg_speed, 
+            CASE MAX(AVG(pedestrian_count), AVG(car_count), AVG(bus_count), AVG(bicycle_count), AVG(motorcycle_count), AVG(truck_count))
+                WHEN AVG(pedestrian_count)
+                    THEN 'Pedestrian'
+                WHEN  AVG(car_count)
+                    THEN 'Car'
+                WHEN  AVG(bus_count)
+                    THEN 'Bus'
+                WHEN  AVG(bicycle_count)
+                    THEN 'Bicycle'
+                WHEN  AVG(motorcycle_count)
+                    THEN 'Motorcycle'
+                WHEN  AVG(truck_count)
+                    THEN 'Truck'
+                END highest_vehicle
+            FROM traffic 
+            GROUP BY strftime ('%H', date_time)
+            HAVING date_time LIKE (?)
+            ORDER BY volume DESC
+            LIMIT 5''', (datetime.date.today().strftime("%Y-%m-%d")+'%', )).fetchall()
+                
+        for highest_row in highest_traffic_rows:
+            data.append(
+                {
+                    'time': highest_row['hour_day'], 
+                    'volume': highest_row['volume'], 
+                    'speed': highest_row['avg_speed'], 
+                    'highest-vehicle': highest_row['highest_vehicle']
+                }
+            )
+            
+        print(data)
+        return data
 
     @app.route('/logout')
     def logout():
@@ -280,8 +499,10 @@ def create_app(test_config=None):
 
     init_app(app)
 
-    # Start the object monitoring and saving
-    thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0'], daemon=False)
-    thread.start()
+    if not app.config.get('TRAFFIC_MONITORING_STARTED', False):
+        app.config['TRAFFIC_MONITORING_STARTED'] = True
+        # Start the object monitoring and saving on a new thread
+        thread = Thread(target=save_traffic_information, args=['https://www.youtube.com/watch?v=F5Q5ViU8QR0', app.app_context()], daemon=True)
+        thread.start()
 
     return app
