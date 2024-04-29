@@ -19,9 +19,17 @@
     <link href="static/vendor/remixicon/remixicon.css" rel="stylesheet">
     <link href="static/vendor/simple-datatables/style.css" rel="stylesheet">
 
-    <script src=
-"https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js">
-    </script>
+    <!-- Include Required Prerequisites -->
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
+    
+    <!-- Include Required Prerequisites -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
+    
+    <!-- Include Date Range Picker -->
+    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
 
 
     <!-- Template Main CSS File -->
@@ -40,9 +48,9 @@
         <nav id="navbar" class="navbar">
           <ul>
             <li><a class="nav-link" href="/landing">Home</a></li>
-            <li><a class="nav-link active" href="/dashboard">Dashboard</a></li>
+            <li><a class="nav-link" href="/dashboard">Dashboard</a></li>
             <li><a class="nav-link" href="/accident_management">Accident Management</a></li>
-            <li><a class="nav-link" href="/traffic_analysis">Traffic Analysis</a></li>
+            <li><a class="nav-link active" href="/traffic_analysis">Traffic Analysis</a></li>
             <li><a class="nav-link" href="/team">Team</a></li>
             <li><a class="nav-link" href="/contact">Contact</a></li>
             <li class="nav-item dropdown pe-3">
@@ -79,108 +87,63 @@
     <main id="main" class="main">
   
       <div class="pagetitle">
-        <h1>Dashboard</h1>
+        <h1>Traffic Analysis</h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="landing.html">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard</li>
+            <li class="breadcrumb-item active">Traffic Analysis</li>
           </ol>
         </nav>
       </div><!-- End Page Title -->
   
       <section class="section dashboard">
         <div class="row">
-          <!-- Traffic Feed -->
-          <div class="col">
+          <div class="col-sm-6">
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">Traffic Feed <span>| Today</span></h5>
-                <div class="traffic-feed">
-                  <iframe src="https://www.youtube.com/embed/{{g['video_id']}}?autoplay=1&controls=0">
-                  </iframe>
-                </div>
+                <h5 class="card-title">Filter by Date</h5>
+                <div id="reportrange" class="pull-right"  style="background: #fff; cursor: pointer; padding: 5px 10px; width: 100%">
+                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                  <span></span> <b class="caret"></b>
               </div>
-            </div>
-          </div> <!-- End Traffic Feed -->
-        </div>
-        
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="row">
-                <!-- Sales Card -->
-              <div class="col-xxl-4 col-xl-4">
-                <div class="card info-card sales-card">
-                  <div class="card-body">
-                    <h5 class="card-title">Traffic Volume <span>| Today</span></h5>
-                    <div class="d-flex align-items-center">
-                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                        <ion-icon name="car-outline"></ion-icon>
-                      </div>
-                      <div class="ps-3">
-                        
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- End Sales Card -->
-  
-              <!-- Revenue Card -->
-              <div class="col-xxl-4 col-xl-4">
-                <div class="card info-card revenue-card">
-                  <div class="card-body">
-                    <h5 class="card-title">Traffic Count <span>| Today</span></h5>
-                    <div class="d-flex align-items-center">
-                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                        <ion-icon name="stats-chart-outline"></ion-icon>
-                      </div>
-                      <div class="ps-3">
-                        
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- End Revenue Card -->
-  
-              <!-- Congestion Card -->
-              <div class="col-xxl-4 col-xl-4">
-                <div class="card info-card customers-card">
-                  <div class="card-body">
-                    <h5 class="card-title">Congestion <span>| Today</span></h5>
-                    <div class="d-flex align-items-center">
-                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                        <ion-icon name="alert-circle-outline"></ion-icon>
-                      </div>
-                      <div class="ps-3">
-                        
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- End Customers Card -->
-            
-              <script>
-                const loadCards = async function() {
-                  const cardElements = document.getElementsByClassName('ps-3');
-
-                  const cardData = await fetch('/get_div_data').then((data)=>data.json());
-                  
-                  for(i=0; i<2; i++) {
-                    cardElements[i].innerHTML = `<h6>${cardData[i]['amount']}</h6>
-                    <span class="text-danger small pt-1 fw-bold">${Math.abs(cardData[i]['percentage'])}%</span> <span class="text-muted small pt-2 ps-1">${cardData[i]['change']}</span>`;
+              
+              <script type="text/javascript">
+              $(function() {
+              
+                  var start = moment().subtract(29, 'days');
+                  var end = moment();
+              
+                  function cb(start, end) {
+                      $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
                   }
+              
+                  $('#reportrange').daterangepicker({
+                      startDate: start,
+                      endDate: end,
+                      ranges: {
+                          'Today': [moment(), moment()],
+                          'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                          'This Month': [moment().startOf('month'), moment().endOf('month')],
+                          'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                      }
+                  }, cb);
+              
+                  cb(start, end);
+                  filterCharts(start, end);
+                  
+              });
 
-                  cardElements[2].innerHTML = `<h6>${cardData[2]['congestion-level']}</h6>
-                    <span class="text-danger small pt-1 fw-bold"><span class="text-muted small pt-2 ps-1">${cardData[2]['change']}</span>`;
-                }
-
-                document.addEventListener('DOMContentLoaded', loadCards);
+              const filterCharts = function(startDate, endDate) {
+                
+              }
               </script>
-
-
-            </div>
-          </div>
+              </div>
+            </div>  
+          </div>  
         </div>
-  
+
         <div class="row">
             <!-- Left side columns -->
             <div class="col-lg">
@@ -413,66 +376,52 @@
             <div class="card-body">
               <h5 class="card-title">Recent Accidents <span>| Today</span></h5>
   
-              <table class="table table-borderless">
+              <table class="table table-borderless datatable">
                 <thead>
                   <tr>
-                    <th scope="col">ID</th>
+                    <th scope="col">#</th>
                     <th scope="col">Time</th>
                     <th scope="col">Involvements</th>
                     <th scope="col">Severity</th>
                     <th scope="col">Status</th>
                   </tr>
                 </thead>
-                <tbody id="accident-table">
-                  <script>
-                    const loadAccidentTable = async function() {
-                      const elm = document.getElementById('accident-table');
-
-                      const accidentData = await fetch('/get_accident_data').then((data)=> data.json());
-
-                      accidentData.forEach((accident)=> {
-                        elm.innerHTML += `
-                        <td scope="row"><button class="btn btn-acc" data-toggle="modal" data-target="#accidentModal">${accident['id']}</button></td>
-                        <td>${accident['time']}</td>
-                        <td>${accident['involved']}</td>
-                        <td><span class="badge bg-danger">Red</span></td>
-                        <td><span class="badge bg-${accident[
-                          'stat']=="Resolved" ? "success" : "warning"}">${accident['stat']}</span></td>
-                        `
-                      });
-
-                      let accButtons = document.getElementsByClassName('btn-acc');
-                      Array.from(accButtons).forEach((btn)=>btn.addEventListener("click", loadAccidentModal));
-                    };
-
-                    const loadAccidentModal = async function() {
-                      const modalData = await fetch('/get_modal_data/'+this.innerHTML.trim()).then((data)=>data.json());
-
-                      const modalHTML = `
-                          <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLongTitle">Accident ID: ${modalData['id']}</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                  <span aria-hidden="true">&times;</span>
-                                </button>
-                              </div>
-                              <div class="modal-body">
-                                <img src="{{url_for('static', filename='img/temp.jpg')}}" />
-                              </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
-                              </div>
-                            </div>
-                          </div>
-                        `
-                      const modalDiv = document.getElementById('accidentModal');
-                      modalDiv.innerHTML = modalHTML;
-                    }
-
-                    document.addEventListener('DOMContentLoaded', loadAccidentTable);
-                  </script>
+                <tbody>
+                  <tr>
+                    <th scope="row"><a href="#">#2457</a></th>
+                    <td>24-04-2024 4:00PM</td>
+                    <td>Car, Truck</td>
+                    <td><span class="badge bg-danger">Red</span></td>
+                    <td><span class="badge bg-success">Resolved</span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><a href="#">#2147</a></th>
+                    <td>24-04-2024 3:30PM</td>
+                    <td>Pedestrian, Bicycle</td>
+                    <td><span class="badge bg-success">Green</span></td>
+                    <td><span class="badge bg-warning">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><a href="#">#2049</a></th>
+                    <td>24-04-2024 2:00PM</td>
+                    <td>Car, Bike</td>
+                    <td><span class="badge bg-warning">Yellow</span></td>
+                    <td><span class="badge bg-success">Resolved</span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><a href="#">#2644</a></th>
+                    <td>24-04-2024 1:00PM</td>
+                    <td>Pedestrian, Car</td>
+                    <td><span class="badge bg-danger">Red</span></td>
+                    <td><span class="badge bg-success">Resolved</span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><a href="#">#2644</a></th>
+                    <td>24-04-2024 12:11AM</td>
+                    <td>Pedestrian, Bicycle</td>
+                    <td><span class="badge bg-success">Green</span></td>
+                    <td><span class="badge bg-warning">Pending</span></td>
+                  </tr>
                 </tbody>
               </table>
   
@@ -484,11 +433,6 @@
         </div>
   
       </div>
-
-      <!-- Modal -->
-      <div class="modal fade" id="accidentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-      </div>
-
     </section>
   
     </main><!-- End #main -->
@@ -518,6 +462,7 @@
     
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
     <!-- Template Main JS File -->
     <script src="static/js/main.js"></script>
   

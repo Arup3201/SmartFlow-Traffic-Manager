@@ -27,3 +27,4 @@ pafy
 lapx
 ultralytics
 shapely
+dill

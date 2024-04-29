@@ -7,7 +7,7 @@ import numpy as np
 from time import time
 from ultralytics.utils.plotting import Annotator
 
-MODEL_PATH = 'sftm_server/yolov8n.pt'
+MODEL_PATH = 'yolov8n.pt'
 
 # Find whether a point is at right or left of a line
 def find_direction_wrt_line(x, y, p):

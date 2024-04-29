@@ -32,7 +32,7 @@ def clear_initialize_db():
     init_db()
     click.echo('Initialized the database.')
 
-def traffic_db(traffic_info):
+def save_to_traffic_db(traffic_info):
     counts = []
     speeds = []
     traffic_volume = 0
@@ -44,9 +44,9 @@ def traffic_db(traffic_info):
 
     traffic_volume = sum(counts) * (sum(speeds) / 6)
 
-    if CONGESTION_THRED_LOW[0] <= traffic_volume <= CONGESTION_THRED_LOW[1]:
+    if CONGESTION_THRED_LOW[0] <= traffic_volume < CONGESTION_THRED_LOW[1]:
         congestion = 0
-    elif CONGESTION_THRED_MED[0] <= traffic_volume <= CONGESTION_THRED_MED[1]:
+    elif CONGESTION_THRED_MED[0] <= traffic_volume < CONGESTION_THRED_MED[1]:
         congestion = 1
     else:
         congestion = 2
@@ -58,6 +58,20 @@ def traffic_db(traffic_info):
     )
     
     db.commit()
+
+def save_to_accident_db(accident_info):
+    db = get_db()
+    
+    query = '''
+    INSERT INTO accidents (date_time, img, involved, stat) VALUES (datetime('now'), ?, ?, 'Pending')
+    '''
+    data_tuple = (accident_info['img'], accident_info['involved'])
+    
+    try:
+        db.execute(query, data_tuple)
+        db.commit()
+    except db.Error:
+        print(f"Error occured when accessing accidents table:\n{db.Error}")
 
 def init_db():
     db = get_db()

@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS traffic;
+DROP TABLE IF EXISTS accidents;
 
 CREATE TABLE user(
     id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -23,4 +24,13 @@ CREATE TABLE traffic(
     truck_speed DECIMAL(5, 2), 
     volume DECIMAL(5, 2), 
     congestion INTEGER 
-)
+);
+
+CREATE TABLE accidents(
+    acc_id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    date_time TEXT NOT NULL,
+    img BLOB NOT NULL, 
+    involved TEXT NOT NULL, 
+    severity TEXT, 
+    stat TEXT NOT NULL
+);
