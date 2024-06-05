@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, flash, redirect, g, jsonify
+from flask import Flask, render_template, request, session, flash, redirect, g, jsonify, send_from_directory
 from werkzeug.security import check_password_hash, generate_password_hash
 import functools
 import os
@@ -118,7 +118,9 @@ def set_traffic_info():
     return {'person': [0, 0], 'car': [0, 0], 'bicycle': [0, 0], 'bus': [0, 0], 'motorcycle': [0, 0], 'truck': [0, 0]}
 
 def convertBinary(img):
-    bin_img = cv2.resize(img, None, fx=0.75, fy=0.75)
+    r = 50.0 / img.shape[0]
+    dim = (int(img.shape[1] * r), 50)
+    bin_img = cv2.resize(img, dim)
     bin_img = cv2.imencode('.jpg', bin_img)[1].tobytes()
     return bin_img
 
@@ -139,7 +141,7 @@ def save_traffic_information(url, app_context):
 
     # Speed estimation
     w, h = cap.get(3), cap.get(4)
-    region_pts = [(w*0.2, h*0.6), (w*0.25, h*0.8), (w*0.99, h*0.5), (w*0.99, h*0.75)]
+    region_pts = [(w*0.1, h*0.55), (w*0.25, h*0.8), (w*0.99, h*0.75), (w*0.99, h*0.5)]
     speed_obj = CustomSpeedEstimator()
     speed_obj.set_args(reg_pts=region_pts, 
                     names=model.names)
@@ -153,8 +155,9 @@ def save_traffic_information(url, app_context):
     # Process each frame of the video
     while True:
         # Get the current video frame
-        _, frame = cap.read()
-
+        _, original_frame = cap.read()
+        frame = original_frame.copy()
+        
         # Track the objects in the video for particular classes we are interested in
         tracks = model.track(source=frame, tracker="bytetrack.yaml", classes=[0, 1, 2, 3, 5, 7], persist=True, imgsz=640, show=False, verbose=False)
 
@@ -171,10 +174,10 @@ def save_traffic_information(url, app_context):
             ind = np.argmax(bboxes.conf)
                 
             # If the confidence score is more than 80% and the accident is a new accident more than 15 mins after the previous one
-            if bboxes.conf[ind] > 0.8 and is_new_accident:
+            if bboxes.conf[ind] > 0.85 and is_new_accident:
                 print("A new accident is detected!!")
                 save_to_accident_db({
-                    'img': convertBinary(frame), 
+                    'img': convertBinary(original_frame), 
                     'involved': ID2ACCIDENTCLASS[int(bboxes.cls[ind])], 
                 })
                 is_new_accident = False
@@ -204,12 +207,10 @@ def save_traffic_information(url, app_context):
         # Sleep for 2 secs
         sleep(2)
 
-def get_img_path(img):
-    arr_np = np.fromstring(img, np.uint8)
-    img_np = cv2.imdecode(arr_np, cv2.CV_BGR2RGB)
-    cv2.imwrite('static/img/temp.jpg', img_np)
-    return 'img/temp.jpg'
-    
+def save_accident_img(img):
+    arr_np = np.frombuffer(img, np.uint8)
+    img_np = cv2.imdecode(arr_np, cv2.IMREAD_COLOR)
+    cv2.imwrite('static/images/temp.jpg', img_np)
 
 def create_app(test_config=None):
     # create and configure the app
@@ -259,7 +260,7 @@ def create_app(test_config=None):
                 except db.IntegrityError:
                     error = f"User {username} is already registered."
                 else:
-                    return render_template('login.html')
+                    return render_template('landing.html')
 
             flash(error)
 
@@ -284,7 +285,7 @@ def create_app(test_config=None):
             if error is None:
                 session.clear()
                 session['user_id'] = user['id']
-                return redirect('/landing_page')
+                return redirect('/landing')
 
             flash(error)
 
@@ -311,7 +312,7 @@ def create_app(test_config=None):
             return view(**kwargs)
         return wrapped_view
 
-    @app.route('/landing_page')
+    @app.route('/landing')
     @login_required
     def landing_page():
         return render_template('landing.html')
@@ -353,10 +354,11 @@ def create_app(test_config=None):
             FROM traffic 
             WHERE date_time LIKE (?)''', (datetime.date.today().strftime("%Y-%m-%d")+'%', )).fetchone()
         
+        yesterday_date = datetime.date.today()-datetime.timedelta(days=1)
         yesterday_traffic = db.execute(
             '''SELECT ROUND(AVG(pedestrian_count+car_count+bus_count+bicycle_count+motorcycle_count+truck_count)) AS avg_traffic_count,ROUND(AVG(volume)) AS avg_volume, MAX(congestion) AS overall_congestion 
             FROM traffic 
-            WHERE date_time LIKE (?)''', ((datetime.date.today()-datetime.timedelta(days=1)).strftime("%Y-%m-%d")+'%', )).fetchone()
+            WHERE date_time LIKE (?)''', (yesterday_date.strftime("%Y-%m-%d")+'%', )).fetchone()
         
         if today_traffic['avg_volume']:
             data[0]['amount'] = today_traffic['avg_volume']
@@ -382,11 +384,13 @@ def create_app(test_config=None):
         print(data)
         return data
 
-    @app.route('/line_chart_data')
+    @app.route('/line_chart_data', defaults={'daterange': f"{datetime.date.today()}--{datetime.date.today()}"})
+    @app.route('/line_chart_data/<daterange>')
     @login_required
-    def line_chart_data():
+    def line_chart_data(daterange):
         db = get_db()
         
+        dates = [datetime.datetime.strptime(str_date, '%Y-%m-%d') for str_date in daterange.split("--")]
         series_data = [
             {
                 'name': 'Pedestrian', 
@@ -421,7 +425,7 @@ def create_app(test_config=None):
         for hour in range(24):
             def get_avg_in_db(string):
                 data = db.execute(
-                    f"SELECT ROUND(AVG({string})) AS avg_{string} FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+f' {hour:0>2}%', )
+                    f"SELECT ROUND(AVG({string})) AS avg_{string} FROM traffic WHERE (date_time BETWEEN datetime(?) AND datetime(?)) AND (date_time LIKE (?))", (dates[0].strftime("%Y-%m-%d"), (dates[1]+datetime.timedelta(days=1)).strftime("%Y-%m-%d"), f'%-%-% {hour:0>2}:%', )
                 ).fetchone()
                 return data[f'avg_{string}'] if data[f'avg_{string}'] else 0
             
@@ -446,9 +450,12 @@ def create_app(test_config=None):
 
         }])
 
-    @app.route('/angular_chart_data')
     @login_required
-    def angular_chart_data():
+    @app.route('/angular_chart_data', defaults={'daterange': f"{datetime.date.today()}--{datetime.date.today()}"})
+    @app.route('/angular_chart_data/<daterange>')
+    def angular_chart_data(daterange):
+        dates = [datetime.datetime.strptime(str_date, '%Y-%m-%d') for str_date in daterange.split("--")]
+        
         data = [{
                     'value': [],
                     'name': 'Average Speed'
@@ -462,7 +469,7 @@ def create_app(test_config=None):
         
         def get_avg_in_db(string):
             data = db.execute(
-                f"SELECT ROUND(AVG({string})) AS avg_{string}                 FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+'%', )
+                f"SELECT ROUND(AVG({string})) AS avg_{string}                 FROM traffic WHERE (date_time BETWEEN datetime(?) AND datetime(?))", (dates[0].strftime("%Y-%m-%d"), (dates[1]+datetime.timedelta(days=1)).strftime("%Y-%m-%d"), )
             ).fetchone()
             return data[f'avg_{string}'] if data[f'avg_{string}'] else 0
             
@@ -474,9 +481,12 @@ def create_app(test_config=None):
         print(data)
         return jsonify(data)
 
-    @app.route('/pie_chart_data')
+    @app.route('/pie_chart_data', defaults={'daterange': f"{datetime.date.today()}--{datetime.date.today()}"})
+    @app.route('/pie_chart_data/<daterange>')
     @login_required
-    def pie_chart_data():
+    def pie_chart_data(daterange):
+        dates = [datetime.datetime.strptime(str_date, '%Y-%m-%d') for str_date in daterange.split("--")]
+        
         data = [{
                 'value': 0,
                 'name': 'Pedestrian'
@@ -505,7 +515,7 @@ def create_app(test_config=None):
         db = get_db()
         def get_volume_in_db(string):
             data = db.execute(
-                f"SELECT ROUND(AVG({string}_count) * AVG({string}_speed)) AS {string}_volume FROM traffic WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+'%', )
+                f"SELECT ROUND(AVG({string}_count) * AVG({string}_speed)) AS {string}_volume FROM traffic WHERE date_time BETWEEN datetime(?) AND datetime(?)", (dates[0].strftime("%Y-%m-%d"), (dates[1]+datetime.timedelta(days=1)).strftime("%Y-%m-%d"), )
             ).fetchone()
             return data[f'{string}_volume'] if data[f'{string}_volume'] else 0
         
@@ -516,12 +526,13 @@ def create_app(test_config=None):
         print(data)
         return jsonify(data)
 
-    @app.route('/highest_traffic')
-    def highest_traffic():
+    @app.route('/highest_traffic', defaults={'daterange': f"{datetime.date.today()}--{datetime.date.today()}"})
+    @app.route('/highest_traffic/<daterange>')
+    def highest_traffic(daterange):
+        dates = [datetime.datetime.strptime(str_date, '%Y-%m-%d') for str_date in daterange.split("--")]
+        
         data = []
-        
         db = get_db()
-        
         highest_traffic_rows = db.execute(
             '''SELECT strftime ('%H', date_time) AS hour_day, ROUND(AVG(volume), 2) as volume, ROUND(AVG(pedestrian_speed+car_speed+bus_speed+bicycle_speed+motorcycle_speed+truck_speed)) AS avg_speed, 
             CASE MAX(AVG(pedestrian_count), AVG(car_count), AVG(bus_count), AVG(bicycle_count), AVG(motorcycle_count), AVG(truck_count))
@@ -540,9 +551,9 @@ def create_app(test_config=None):
                 END highest_vehicle
             FROM traffic 
             GROUP BY strftime ('%H', date_time)
-            HAVING date_time LIKE (?)
+            HAVING date_time BETWEEN datetime(?) AND datetime(?)
             ORDER BY volume DESC
-            LIMIT 5''', (datetime.date.today().strftime("%Y-%m-%d")+'%', )).fetchall()
+            LIMIT 5''', (dates[0].strftime("%Y-%m-%d"), (dates[1]+datetime.timedelta(days=1)).strftime("%Y-%m-%d"), )).fetchall()
                 
         for highest_row in highest_traffic_rows:
             data.append(
@@ -557,6 +568,10 @@ def create_app(test_config=None):
         print(data)
         return data
 
+    @app.route('/static/images/<filename>')
+    def serve_img(filename):
+        return send_from_directory('static/images', filename)
+
     @app.route('/get_modal_data/<string:acc_id>')
     @login_required
     def get_modal_data(acc_id):
@@ -569,23 +584,24 @@ def create_app(test_config=None):
         
         modal_data['id'] = data['acc_id']
         modal_data['time'] = data['date_time']
-        modal_data['image'] = get_img_path(data['img'])
         modal_data['involved'] = data['involved']
         modal_data['severity'] = data['severity']
         modal_data['stat'] = data['stat']
         
+        save_accident_img(data['img'])
+        
         print(modal_data)
         return jsonify([modal_data])
 
-    @app.route('/get_accident_data')
+    @app.route('/get_accident_data', defaults={'daterange': f"{datetime.date.today()}--{datetime.date.today()}"})
+    @app.route('/get_accident_data/<daterange>')
     @login_required
-    def get_accident_data():
+    def get_accident_data(daterange):
+        dates = [datetime.datetime.strptime(str_date, '%Y-%m-%d') for str_date in daterange.split("--")]
         accidents = []
-        
         db = get_db()
         data = db.execute(
-            "SELECT acc_id, date_time, involved, severity, stat FROM accidents WHERE date_time LIKE (?)", (datetime.date.today().strftime("%Y-%m-%d")+"%", )
-        ).fetchall()
+            "SELECT acc_id, date_time, involved, severity, stat FROM accidents WHERE date_time BETWEEN datetime(?) AND datetime(?)", (dates[0].strftime("%Y-%m-%d"), (dates[1]+datetime.timedelta(days=1)).strftime("%Y-%m-%d"), )).fetchall()
         
         for row in data:
             accidents.append(
@@ -600,21 +616,6 @@ def create_app(test_config=None):
         
         print(accidents)
         return accidents
-
-    @app.route('/line_chart_analysis/<string:timeline>')
-    @login_required
-    def line_chart_analysis(timeline):
-        pass
-    
-    @app.route('/angular_chart_analysis/<string:timeline>')
-    @login_required
-    def angular_chart_analysis(timeline):
-        pass
-    
-    @app.route('/pie_chart_analysis/<string:timeline>')
-    @login_required
-    def pie_chart_analysis(timeline):
-        pass
 
     @app.route('/logout')
     def logout():

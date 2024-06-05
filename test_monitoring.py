@@ -109,7 +109,7 @@ def main():
    
     # Speed estimation
     w, h = cap.get(3), cap.get(4)
-    region_pts = [(w*0.2, h*0.6), (w*0.25, h*0.7), (w*0.99, h*0.65), (w*0.8, h*0.55)]
+    region_pts = [(w*0.1, h*0.55), (w*0.25, h*0.8), (w*0.99, h*0.75), (w*0.99, h*0.5)]
     speed_obj = CustomSpeedEstimator()
     speed_obj.set_args(reg_pts=region_pts, 
                        names=model.names)
@@ -125,7 +125,7 @@ def main():
         # Track the objects in the video for particular classes we are interested in
         tracks = model.track(source=frame, tracker="bytetrack.yaml", classes=[0, 1, 2, 3, 5, 7], persist=True, show=False)
 
-        speed_obj.estimate_speed(frame, tracks)
+        result = speed_obj.estimate_speed(frame, tracks)
 
         # Calculate the total no of objects from each class and sum of speeds
         for tracking_obj in speed_obj.tracking_objs:
@@ -138,8 +138,10 @@ def main():
             if value[0]:
                 traffic_info[key][1] = value[1] / value[0]
 
+        cv.imshow("Traffic Monitoring", result)
+        
         print(traffic_info)
-
+        
         # Reset the traffic volume for next iteration
         traffic_info = set_traffic_info()
 

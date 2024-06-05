@@ -54,7 +54,7 @@ def save_to_traffic_db(traffic_info):
     db = get_db()
 
     db.execute(
-        "INSERT INTO traffic (date_time, pedestrian_count, car_count, bicycle_count, bus_count, motorcycle_count, truck_count, pedestrian_speed, car_speed, bicycle_speed, bus_speed, motorcycle_speed, truck_speed, volume, congestion) VALUES (datetime('now'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (traffic_info['person'][0], traffic_info['car'][0], traffic_info['bicycle'][0], traffic_info['bus'][0], traffic_info['motorcycle'][0], traffic_info['truck'][0], traffic_info['person'][1], traffic_info['car'][1], traffic_info['bicycle'][1], traffic_info['bus'][1], traffic_info['motorcycle'][1], traffic_info['truck'][1], traffic_volume, congestion)
+        "INSERT INTO traffic (date_time, pedestrian_count, car_count, bicycle_count, bus_count, motorcycle_count, truck_count, pedestrian_speed, car_speed, bicycle_speed, bus_speed, motorcycle_speed, truck_speed, volume, congestion) VALUES (datetime('now', 'localtime'), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (traffic_info['person'][0], traffic_info['car'][0], traffic_info['bicycle'][0], traffic_info['bus'][0], traffic_info['motorcycle'][0], traffic_info['truck'][0], traffic_info['person'][1], traffic_info['car'][1], traffic_info['bicycle'][1], traffic_info['bus'][1], traffic_info['motorcycle'][1], traffic_info['truck'][1], traffic_volume, congestion)
     )
     
     db.commit()

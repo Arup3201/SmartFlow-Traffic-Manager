@@ -1,455 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
+  <head>
     <title>Dashboard - SmartFlow Traffic Manager</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
-        rel="stylesheet">
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Jost:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+      rel="stylesheet"
+    />
 
     <!-- Vendor CSS Files -->
-    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="static/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="static/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="static/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="static/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="static/vendor/simple-datatables/style.css" rel="stylesheet">
+    <link
+      href="static/vendor/bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="static/vendor/bootstrap-icons/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet" />
+    <link href="static/vendor/quill/quill.snow.css" rel="stylesheet" />
+    <link href="static/vendor/quill/quill.bubble.css" rel="stylesheet" />
+    <link href="static/vendor/remixicon/remixicon.css" rel="stylesheet" />
+    <link href="static/vendor/simple-datatables/style.css" rel="stylesheet" />
 
     <!-- Include Required Prerequisites -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
-    
-    <!-- Include Required Prerequisites -->
-    <script type="text/javascript" src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"></script>
-    <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css" />
-    
-    <!-- Include Date Range Picker -->
-    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css"
+    />
 
     <!-- Template Main CSS File -->
-    <link href="static/style/style.css" rel="stylesheet">
+    <link href="static/style/style.css" rel="stylesheet" />
 
-</head>
+    <!-- Include Required Prerequisites -->
+    <script
+      type="text/javascript"
+      src="//cdn.jsdelivr.net/jquery/1/jquery.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//cdn.jsdelivr.net/bootstrap/3/css/bootstrap.css"
+    />
 
-<body>
+    <!-- Include Date Range Picker -->
+    <script
+      type="text/javascript"
+      src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css"
+    />
 
-    <!-- ======= Header ======= -->
-    <header id="header" class="fixed-top ">
-      <div class="container d-flex align-items-center">
-  
-        <h1 class="logo me-auto">SmartFlow Traffic Manager</h1>
-  
-        <nav id="navbar" class="navbar">
-          <ul>
-            <li><a class="nav-link" href="/landing">Home</a></li>
-            <li><a class="nav-link" href="/dashboard">Dashboard</a></li>
-            <li><a class="nav-link" href="/accident_management">Accident Management</a></li>
-            <li><a class="nav-link active" href="/traffic_analysis">Traffic Analysis</a></li>
-            <li><a class="nav-link" href="/team">Team</a></li>
-            <li><a class="nav-link" href="/contact">Contact</a></li>
-            <li class="nav-item dropdown pe-3">
-  
-              <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-                <ion-icon name="person-circle-outline"></ion-icon>
-                <span class="d-none d-md-block dropdown-toggle ps-2">Account</span>
-              </a><!-- End Profile Iamge Icon -->
-  
-              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
-                <li class="dropdown-header">
-                  <h6>User Name: {{g.user['username']}}</h6>
-                </li>
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-  
-                <li>
-                  <a class="dropdown-item d-flex align-items-center" href="/logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Logout</span>
-                  </a>
-                </li>
-  
-              </ul><!-- End Profile Dropdown Items -->
-            </li><!-- End Profile Nav -->
-          </ul>
-          <i class="bi bi-list mobile-nav-toggle"></i>
-        </nav><!-- .navbar -->
-  
-      </div>
-    </header><!-- End Header -->
-  
-    <main id="main" class="main">
-  
-      <div class="pagetitle">
-        <h1>Traffic Analysis</h1>
-        <nav>
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="landing.html">Home</a></li>
-            <li class="breadcrumb-item active">Traffic Analysis</li>
-          </ol>
-        </nav>
-      </div><!-- End Page Title -->
-  
-      <section class="section dashboard">
-        <div class="row">
-          <div class="col-sm-6">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Filter by Date</h5>
-                <div id="reportrange" class="pull-right"  style="background: #fff; cursor: pointer; padding: 5px 10px; width: 100%">
-                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
-                  <span></span> <b class="caret"></b>
-              </div>
-              
-              <script type="text/javascript">
-              $(function() {
-              
-                  var start = moment().subtract(29, 'days');
-                  var end = moment();
-              
-                  function cb(start, end) {
-                      $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
-                  }
-              
-                  $('#reportrange').daterangepicker({
-                      startDate: start,
-                      endDate: end,
-                      ranges: {
-                          'Today': [moment(), moment()],
-                          'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                          'This Month': [moment().startOf('month'), moment().endOf('month')],
-                          'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                      }
-                  }, cb);
-              
-                  cb(start, end);
-                  filterCharts(start, end);
-                  
-              });
+    <!-- Include Bootpag for Pagination -->
+    <script
+      type="text/javascript"
+      src="http://botmonster.com/jquery-bootpag/jquery.bootpag.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"
+    />
 
-              const filterCharts = function(startDate, endDate) {
-                
-              }
-              </script>
-              </div>
-            </div>  
-          </div>  
-        </div>
-
-        <div class="row">
-            <!-- Left side columns -->
-            <div class="col-lg">
-              <!-- Reports -->
-              <div class="col-12">
-                <div class="card">
-                  <div class="card-body">
-                    <h5 class="card-title">Traffic Volume Report <span>| Today</span></h5>
-  
-                    <!-- Line Chart -->
-                    <div id="lineChart"></div>
-  
-                    <script>
-                      const plotLineChart = async function() {
-                        // Fetch data from the API
-                        const fetchedData = await fetch('/line_chart_data').then((data)=> data.json())
-
-                        const series_data = fetchedData[0]['series_data'];
-                        const categories = fetchedData[0]['categories'];
-  
-                        new ApexCharts(document.querySelector("#lineChart"), {
-                          series: series_data,
-                          chart: {
-                            height: 350,
-                            type: 'area',
-                            toolbar: {
-                              show: true
-                            },
-                          },
-                          markers: {
-                            size: 4
-                          },
-                          colors: ['#4263eb', '#69db7c', '#ffd43b', '#fa5252', '#4dabf7', '#087f5b', '#555555'],
-                          fill: {
-                            type: "gradient",
-                            gradient: {
-                              shadeIntensity: 1,
-                              opacityFrom: 0.3,
-                              opacityTo: 0.4,
-                              stops: [0, 90, 100]
-                            }
-                          },
-                          dataLabels: {
-                            enabled: false
-                          },
-                          stroke: {
-                            curve: 'smooth',
-                            width: 2
-                          },
-                          xaxis: {
-                            type: 'time',
-                            categories: categories
-                          },
-                          tooltip: {
-                            x: {
-                              format: 'dd/MM/yy HH:mm'
-                            },
-                          }
-                        }).render();
-                      }
-  
-                      document.addEventListener("DOMContentLoaded", plotLineChart);
-                    </script>
-                    <!-- End Line Chart -->
-  
-                  </div>
-                </div>
-              </div><!-- End Reports -->
-              
-        </div>
-  
-        <div class="row">
-          <div class="col-lg-6">
-            <!-- Budget Report -->
-            <div class="card">
-              <div class="card-body pb-0">
-                <h5 class="card-title">Speed and Count Analysis <span>| Today</span></h5>
-  
-                <div id="angularChart" style="min-height: 400px;" class="echart"></div>
-  
-                <script>
-                  const plotAngularChart = async function() {
-                    // Fetch data from the API
-                    const data = await fetch('/angular_chart_data').then((data)=> data.json());
-
-                    const angularChart = echarts.init(document.querySelector("#angularChart")).setOption({
-                      legend: {
-                        data: ['Average Speed', 'Total Count']
-                      },
-                      radar: {
-                        // shape: 'circle',
-                        indicator: [{
-                          name: 'Pedestrian',
-                          max: 30
-                        },
-                        {
-                          name: 'Car',
-                          max: 100
-                        },
-                        {
-                          name: 'Bus',
-                          max: 90
-                        },
-                        {
-                          name: 'Bicycle',
-                          max: 30
-                        },
-                        {
-                          name: 'Motorcycle',
-                          max: 30
-                        },
-                        {
-                          name: 'Truck',
-                          max: 100
-                        }
-                        ]
-                      },
-                      series: [{
-                        name: 'Average Speed vs Total Count',
-                        type: 'radar',
-                        data: data
-                      }]
-                    });
-                  }
-  
-                  document.addEventListener("DOMContentLoaded", plotAngularChart);
-                </script>
-  
-              </div>
-            </div><!-- End Budget Report -->
-          </div>
-  
-          <div class="col-lg-6">
-            <!-- Website Traffic -->
-            <div class="card">
-               <div class="card-body pb-0">
-                <h5 class="card-title">Traffic Volume Analysis <span>| Today</span></h5>
-                <div id="trafficChart" style="min-height: 400px;" class="echart"></div>
-  
-                <script>
-                  const plotPieChart = async function() {
-                    // Fetch data from the API
-                    const pie_chart_data = await fetch('/pie_chart_data').then((data)=> data.json())
-  
-                    echarts.init(document.querySelector("#trafficChart")).setOption({
-                      tooltip: {
-                        trigger: 'item'
-                      },
-                      legend: {
-                        top: '5%',
-                        left: 'center'
-                      },
-                      series: [{
-                        name: 'Access From',
-                        type: 'pie',
-                        radius: ['40%', '70%'],
-                        avoidLabelOverlap: false,
-                        label: {
-                          show: false,
-                          position: 'center'
-                        },
-                        emphasis: {
-                          label: {
-                            show: true,
-                            fontSize: '18',
-                            fontWeight: 'bold'
-                          }
-                        },
-                        labelLine: {
-                          show: false
-                        },
-                        data: pie_chart_data
-                      }]
-                    });
-                  }
-                  
-                  document.addEventListener("DOMContentLoaded", plotPieChart);
-                </script>
-  
-              </div>
-            </div><!-- End Website Traffic -->
-          </div>
-        </div>
-  
-        <!-- Highest Traffic Volume -->
-        <div class="col-12">
-          <div class="card top-selling overflow-auto">
-  
-            <div class="card-body pb-0">
-              <h5 class="card-title">Highest Traffic Time <span>| Today</span></h5>
-  
-              <table class="table table-borderless">
-                <thead>
-                  <tr>
-                    <th scope="col">Time</th>
-                    <th scope="col">Traffic Volume</th>
-                    <th scope="col">Average Speed</th>
-                    <th scope="col">Maximum Vehicle</th>
-                  </tr>
-                </thead>
-                <tbody id="highest-traffic">
-                  <script>
-                    const loadHighestTraffic = async function() {
-                      const tableBody = document.getElementById('highest-traffic');
-                      const data = await fetch('/highest_traffic').then((data)=> data.json())
-                      
-                      data.forEach((elm) => {
-                        tableBody.innerHTML += `
-                        <tr>
-                          <th scope="row">${elm['time']}:00</th>
-                          <td>${elm['volume']}</td>
-                          <td>${elm['speed']}</td>
-                          <td>${elm['highest-vehicle']}</td>
-                        </tr>
-                        `
-                      });
-                    }
-
-                    document.addEventListener('DOMContentLoaded', loadHighestTraffic);
-                  </script>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div><!-- End Top Selling -->
-  
-        <!-- Recent Sales -->
-        <div class="col-12">
-          <div class="card recent-sales overflow-auto">
-            <div class="card-body">
-              <h5 class="card-title">Recent Accidents <span>| Today</span></h5>
-  
-              <table class="table table-borderless datatable">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Involvements</th>
-                    <th scope="col">Severity</th>
-                    <th scope="col">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row"><a href="#">#2457</a></th>
-                    <td>24-04-2024 4:00PM</td>
-                    <td>Car, Truck</td>
-                    <td><span class="badge bg-danger">Red</span></td>
-                    <td><span class="badge bg-success">Resolved</span></td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><a href="#">#2147</a></th>
-                    <td>24-04-2024 3:30PM</td>
-                    <td>Pedestrian, Bicycle</td>
-                    <td><span class="badge bg-success">Green</span></td>
-                    <td><span class="badge bg-warning">Pending</span></td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><a href="#">#2049</a></th>
-                    <td>24-04-2024 2:00PM</td>
-                    <td>Car, Bike</td>
-                    <td><span class="badge bg-warning">Yellow</span></td>
-                    <td><span class="badge bg-success">Resolved</span></td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><a href="#">#2644</a></th>
-                    <td>24-04-2024 1:00PM</td>
-                    <td>Pedestrian, Car</td>
-                    <td><span class="badge bg-danger">Red</span></td>
-                    <td><span class="badge bg-success">Resolved</span></td>
-                  </tr>
-                  <tr>
-                    <th scope="row"><a href="#">#2644</a></th>
-                    <td>24-04-2024 12:11AM</td>
-                    <td>Pedestrian, Bicycle</td>
-                    <td><span class="badge bg-success">Green</span></td>
-                    <td><span class="badge bg-warning">Pending</span></td>
-                  </tr>
-                </tbody>
-              </table>
-  
-              </div>
-  
-            </div>
-          </div><!-- End Recent Sales -->
-  
-        </div>
-  
-      </div>
-    </section>
-  
-    </main><!-- End #main -->
-  
-    <!-- ======= Footer ======= -->
-    <footer id="footer" class="footer">
-      <div class="copyright">
-        &copy; Copyright <strong><span>Arup, Avijit and Abhisake</span></strong>. All Rights Reserved
-      </div>
-      <div class="credits">
-        Designed by <a href="https://www.linkedin.com/in/arup-jana-main/">Arup</a> & <a href="https://bootstrapmade.com/">Bootstrapmade</a>
-      </div>
-    </footer><!-- End Footer -->
-  
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
-        class="bi bi-arrow-up-short"></i></a>
-  
     <!-- Vendor JS Files -->
     <script src="static/vendor/apexcharts/apexcharts.min.js"></script>
     <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
@@ -459,13 +80,526 @@
     <script src="static/vendor/simple-datatables/simple-datatables.js"></script>
     <script src="static/vendor/tinymce/tinymce.min.js"></script>
     <script src="static/vendor/php-email-form/validate.js"></script>
-    
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
 
     <!-- Template Main JS File -->
     <script src="static/js/main.js"></script>
-  
-  </body>
+  </head>
 
+  <body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top">
+      <div class="container d-flex align-items-center">
+        <h1 class="logo me-auto">SmartFlow Traffic Manager</h1>
+
+        <nav id="navbar" class="navbar">
+          <ul>
+            <li><a class="nav-link" href="/landing">Home</a></li>
+            <li><a class="nav-link" href="/dashboard">Dashboard</a></li>
+            <li>
+              <a class="nav-link" href="/accident_management"
+                >Accident Management</a
+              >
+            </li>
+            <li>
+              <a class="nav-link active" href="/traffic_analysis"
+                >Traffic Analysis</a
+              >
+            </li>
+            <li><a class="nav-link" href="/team">Team</a></li>
+            <li><a class="nav-link" href="/contact">Contact</a></li>
+            <li class="nav-item dropdown pe-3">
+              <a
+                class="nav-link nav-profile d-flex align-items-center pe-0"
+                href="#"
+                data-bs-toggle="dropdown"
+              >
+                <ion-icon name="person-circle-outline"></ion-icon>
+                <span class="d-none d-md-block dropdown-toggle ps-2"
+                  >Account</span
+                > </a
+              ><!-- End Profile Iamge Icon -->
+
+              <ul
+                class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
+              >
+                <li class="dropdown-header">
+                  <h6>User Name: {{g.user['username']}}</h6>
+                </li>
+                <li>
+                  <hr class="dropdown-divider" />
+                </li>
+
+                <li>
+                  <a
+                    class="dropdown-item d-flex align-items-center"
+                    href="/logout"
+                  >
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Logout</span>
+                  </a>
+                </li>
+              </ul>
+              <!-- End Profile Dropdown Items -->
+            </li>
+            <!-- End Profile Nav -->
+          </ul>
+          <i class="bi bi-list mobile-nav-toggle"></i>
+        </nav>
+        <!-- .navbar -->
+      </div>
+    </header>
+    <!-- End Header -->
+
+    <main id="main" class="main">
+      <div class="pagetitle">
+        <h1>Traffic Analysis</h1>
+        <nav>
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="landing.html">Home</a></li>
+            <li class="breadcrumb-item active">Traffic Analysis</li>
+          </ol>
+        </nav>
+      </div>
+      <!-- End Page Title -->
+
+      <section class="section dashboard">
+        <div class="row">
+          <div class="col-sm-6">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Filter by Date</h5>
+                <div
+                  id="reportrange"
+                  class="pull-right"
+                  style="
+                    background: #fff;
+                    cursor: pointer;
+                    padding: 5px 10px;
+                    width: 100%;
+                  "
+                >
+                  <i class="glyphicon glyphicon-calendar fa fa-calendar"></i
+                  >&nbsp; <span></span> <b class="caret"></b>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Left side columns -->
+          <div class="col-lg">
+            <!-- Reports -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">
+                    Traffic Volume Report <span class="daterange"></span>
+                  </h5>
+
+                  <!-- Line Chart -->
+                  <div id="lineChart"></div>
+                  <!-- End Line Chart -->
+                </div>
+              </div>
+            </div>
+            <!-- End Reports -->
+          </div>
+
+          <div class="row">
+            <div class="col-lg-6">
+              <!-- Budget Report -->
+              <div class="card">
+                <div class="card-body pb-0">
+                  <h5 class="card-title">
+                    Speed and Count Analysis <span class="daterange"></span>
+                  </h5>
+
+                  <div
+                    id="angularChart"
+                    style="min-height: 400px"
+                    class="echart"
+                  ></div>
+                </div>
+              </div>
+              <!-- End Budget Report -->
+            </div>
+
+            <div class="col-lg-6">
+              <!-- Website Traffic -->
+              <div class="card">
+                <div class="card-body pb-0">
+                  <h5 class="card-title">
+                    Traffic Volume Analysis <span class="daterange"></span>
+                  </h5>
+                  <div
+                    id="trafficChart"
+                    style="min-height: 400px"
+                    class="echart"
+                  ></div>
+                </div>
+              </div>
+              <!-- End Website Traffic -->
+            </div>
+          </div>
+
+          <!-- Highest Traffic Volume -->
+          <div class="col-12">
+            <div class="card top-selling overflow-auto">
+              <div class="card-body pb-0">
+                <h5 class="card-title">
+                  Highest Traffic Time <span class="daterange"></span>
+                </h5>
+
+                <table class="table table-borderless">
+                  <thead>
+                    <tr>
+                      <th scope="col">Time</th>
+                      <th scope="col">Traffic Volume</th>
+                      <th scope="col">Average Speed</th>
+                      <th scope="col">Maximum Vehicle</th>
+                    </tr>
+                  </thead>
+                  <tbody id="highest-traffic"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- End Top Selling -->
+
+          <!-- Accidents -->
+          <div class="col-12">
+            <div class="card recent-sales overflow-auto">
+              <div class="card-body">
+                <h5 class="card-title">
+                  Accidents <span class="daterange"></span>
+                </h5>
+
+                <table class="table table-borderless">
+                  <thead>
+                    <tr>
+                      <th scope="col">ID</th>
+                      <th scope="col">Time</th>
+                      <th scope="col">Involvements</th>
+                      <th scope="col">Severity</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="accident-table"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- End Recent Accidents -->
+        </div>
+      </section>
+    </main>
+    <!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+      <div class="copyright">
+        &copy; Copyright <strong><span>Arup, Avijit and Abhisake</span></strong
+        >. All Rights Reserved
+      </div>
+      <div class="credits">
+        Designed by
+        <a href="https://www.linkedin.com/in/arup-jana-main/">Arup</a> &
+        <a href="https://bootstrapmade.com/">Bootstrapmade</a>
+      </div>
+    </footer>
+    <!-- End Footer -->
+
+    <script>
+      const changeShownTime = function (start, end) {
+        const dateSpans = document.getElementsByClassName("daterange");
+        Array.from(dateSpans).forEach((elm) => {
+          elm.innerHTML = `| ${start}-${end}`;
+        });
+      };
+
+      const plotLineChart = async function (start, end) {
+        const query = start && end && `/${start}--${end}`;
+
+        // Fetch data from the API
+        const fetchedData = await fetch(`/line_chart_data${query}`).then(
+          (data) => data.json()
+        );
+
+        const series_data = fetchedData[0]["series_data"];
+        const categories = fetchedData[0]["categories"];
+
+        new ApexCharts(document.querySelector("#lineChart"), {
+          series: series_data,
+          chart: {
+            height: 350,
+            type: "area",
+            toolbar: {
+              show: true,
+            },
+          },
+          markers: {
+            size: 4,
+          },
+          colors: [
+            "#4263eb",
+            "#69db7c",
+            "#ffd43b",
+            "#fa5252",
+            "#4dabf7",
+            "#087f5b",
+            "#555555",
+          ],
+          fill: {
+            type: "gradient",
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.3,
+              opacityTo: 0.4,
+              stops: [0, 90, 100],
+            },
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+            curve: "smooth",
+            width: 2,
+          },
+          xaxis: {
+            type: "time",
+            categories: categories,
+          },
+          tooltip: {
+            x: {
+              format: "dd/MM/yy HH:mm",
+            },
+          },
+        }).render();
+      };
+
+      const plotAngularChart = async function (start, end) {
+        const query = start && end && `/${start}--${end}`;
+
+        // Fetch data from the API
+        const data = await fetch(`/angular_chart_data${query}`).then((data) =>
+          data.json()
+        );
+
+        const angularChart = echarts
+          .init(document.querySelector("#angularChart"))
+          .setOption({
+            legend: {
+              data: ["Average Speed", "Total Count"],
+            },
+            radar: {
+              // shape: 'circle',
+              indicator: [
+                {
+                  name: "Pedestrian",
+                  max: 30,
+                },
+                {
+                  name: "Car",
+                  max: 100,
+                },
+                {
+                  name: "Bus",
+                  max: 90,
+                },
+                {
+                  name: "Bicycle",
+                  max: 30,
+                },
+                {
+                  name: "Motorcycle",
+                  max: 30,
+                },
+                {
+                  name: "Truck",
+                  max: 100,
+                },
+              ],
+            },
+            series: [
+              {
+                name: "Average Speed vs Total Count",
+                type: "radar",
+                data: data,
+              },
+            ],
+          });
+      };
+
+      const plotPieChart = async function (start, end) {
+        const query = start && end && `/${start}--${end}`;
+
+        // Fetch data from the API
+        const pie_chart_data = await fetch(`/pie_chart_data${query}`).then(
+          (data) => data.json()
+        );
+
+        echarts.init(document.querySelector("#trafficChart")).setOption({
+          tooltip: {
+            trigger: "item",
+          },
+          legend: {
+            top: "5%",
+            left: "center",
+          },
+          series: [
+            {
+              name: "Access From",
+              type: "pie",
+              radius: ["40%", "70%"],
+              avoidLabelOverlap: false,
+              label: {
+                show: false,
+                position: "center",
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: "18",
+                  fontWeight: "bold",
+                },
+              },
+              labelLine: {
+                show: false,
+              },
+              data: pie_chart_data,
+            },
+          ],
+        });
+      };
+
+      const loadHighestTraffic = async function (start, end) {
+        const query = start && end && `/${start}--${end}`;
+
+        const tableBody = document.getElementById("highest-traffic");
+        const data = await fetch(`/highest_traffic${query}`).then((data) =>
+          data.json()
+        );
+        tableBody.innerHTML = "";
+        data.forEach((elm) => {
+          tableBody.innerHTML += `
+            <tr>
+              <th scope="row">${elm["time"]}:00</th>
+              <td>${elm["volume"]}</td>
+              <td>${elm["speed"]}</td>
+              <td>${elm["highest-vehicle"]}</td>
+            </tr>
+            `;
+        });
+      };
+
+      const loadAccidentTable = async function (start, end) {
+        const query = start && end && `/${start}--${end}`;
+        const elm = document.getElementById("accident-table");
+
+        const accidentData = await fetch(`/get_accident_data${query}`).then(
+          (data) => data.json()
+        );
+
+        accidentData.forEach((accident) => {
+          elm.innerHTML += `
+          <td scope="row"><button type="button" class="btn btn-primary">${
+            accident["id"]
+          }</button></td>
+          <td>${accident["time"]}</td>
+          <td>${accident["involved"]}</td>
+          <td><span class="badge bg-danger">Red</span></td>
+          <td><span class="badge bg-${
+            accident["stat"] == "Resolved" ? "success" : "warning"
+          }">${accident["stat"]}</span></td>
+          `;
+        });
+
+        return accs;
+      };
+
+      $(function () {
+        var start = moment().subtract(29, "days");
+        var end = moment();
+
+        function cb(start, end) {
+          $("#reportrange span").html(
+            start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY")
+          );
+        }
+
+        $("#reportrange").daterangepicker(
+          {
+            startDate: start,
+            endDate: end,
+            ranges: {
+              Today: [moment(), moment()],
+              Yesterday: [
+                moment().subtract(1, "days"),
+                moment().subtract(1, "days"),
+              ],
+              "Last 7 Days": [moment().subtract(6, "days"), moment()],
+              "Last 30 Days": [moment().subtract(29, "days"), moment()],
+              "This Month": [
+                moment().startOf("month"),
+                moment().endOf("month"),
+              ],
+              "Last Month": [
+                moment().subtract(1, "month").startOf("month"),
+                moment().subtract(1, "month").endOf("month"),
+              ],
+            },
+          },
+          cb
+        );
+
+        cb(start, end);
+
+        changeShownTime(
+          start.format("MMMM D, YYYY"),
+          end.format("MMMM D, YYYY")
+        );
+        startDate = start.format("YYYY-MM-DD");
+        endDate = end.format("YYYY-MM-DD");
+        plotLineChart(startDate, endDate);
+        plotAngularChart(startDate, endDate);
+        plotPieChart(startDate, endDate);
+        loadHighestTraffic(startDate, endDate);
+        loadAccidentTable(startDate, endDate);
+      });
+
+      $("#reportrange").on(
+        "apply.daterangepicker",
+        async function (ev, picker) {
+          changeShownTime(
+            picker.startDate.format("MMMM D, YYYY"),
+            picker.endDate.format("MMMM D, YYYY")
+          );
+
+          start = picker.startDate.format("YYYY-MM-DD");
+          end = picker.endDate.format("YYYY-MM-DD");
+          await plotLineChart(start, end);
+          await plotAngularChart(start, end);
+          await plotPieChart(start, end);
+          await loadHighestTraffic(start, end);
+          await loadAccidentTable(start, end);
+        }
+      );
+    </script>
+
+    <a
+      href="#"
+      class="back-to-top d-flex align-items-center justify-content-center"
+      ><i class="bi bi-arrow-up-short"></i
+    ></a>
+  </body>
 </html>
